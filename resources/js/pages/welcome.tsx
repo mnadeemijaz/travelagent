@@ -19,7 +19,6 @@ import {
     Phone,
     Plane,
     Shield,
-    Star,
     Twitter,
     Umbrella,
     X,
@@ -64,30 +63,39 @@ const services = [
     },
 ];
 
+// Hero slider slides — set `image` to a URL string when you have real photos
+const heroSlides = [
+    {
+        image: "/storage/front/slide-1.jpg" as string | null,
+        tag: "Pakistan's Trusted Travel Partner",
+        title: 'AL Abrar Group\nof Travels',
+        subtitle: 'Your gateway to the world — Umrah packages, international tours, airline tickets, visa services and hotel bookings at unbeatable PKR prices.',
+    },
+    {
+        image: "/storage/front/slide-2.jpg" as string | null,
+        tag: 'Sacred Journeys',
+        title: 'Umrah &\nHajj Packages',
+        subtitle: 'Complete guided Umrah packages with 5-star accommodation in Makkah & Madinah, visa assistance and group/family options.',
+    },
+    {
+        image: "/storage/front/slide-3.jpg" as string | null,
+        tag: 'Explore the World',
+        title: 'International\nTour Packages',
+        subtitle: 'Dubai, Turkey, Europe, Malaysia and beyond — curated holiday packages at the best PKR rates with full support.',
+    },
+];
+
 // DB-driven types
 interface DbDestination { id: number; name: string; country: string | null; price: string; image_url: string; }
 interface DbPackage    { id: number; name: string; price: string; image_url: string; }
-interface DbExperience { id: number; name: string; image_url: string; }
+interface DbExperience  { id: number; name: string; image_url: string; }
+interface DbHotelImage { id: number; name: string; city_name: string; price: number; image_url: string; }
 
-const testimonials = [
-    {
-        name: 'Farhan Ahmed',
-        role: 'Lahore',
-        text: '"Al Abrar made our family Umrah trip absolutely seamless. Everything from visa to hotel was perfectly arranged. Highly recommended!"',
-        stars: 5,
-    },
-    {
-        name: 'Sana Malik',
-        role: 'Karachi',
-        text: '"Booked a Dubai tour package and it exceeded our expectations. Excellent service, great hotels and very affordable prices in PKR."',
-        stars: 5,
-    },
-    {
-        name: 'Zubair Hassan',
-        role: 'Islamabad',
-        text: '"Professional team, prompt responses and transparent pricing. Got our Turkey visa approved in 5 days. Will book again for sure!"',
-        stars: 5,
-    },
+// Flight / travel partners — set `image` to your logo URL when ready
+const partners = [
+    { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
+    { name: 'PSA',  fullName: 'Pakistan Survey Authority',               image: "storage/front/psa.png" as string | null },
+    { name: 'ISA',  fullName: 'International Shipping Association',      image: "storage/front/isa.png" as string | null },
 ];
 
 // gallery is now DB-driven (passed as prop)
@@ -261,13 +269,40 @@ interface WelcomeProps {
     destinations: DbDestination[];
     packages: DbPackage[];
     experiences: DbExperience[];
+    hotelImages: DbHotelImage[];
 }
 
-export default function Welcome({ destinations, packages, experiences }: WelcomeProps) {
+export default function Welcome({ destinations, packages, experiences, hotelImages }: WelcomeProps) {
     const { auth } = usePage<SharedData>().props;
     const [mobileOpen, setMobileOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
+
+    // Hero slider
+    const [heroSlide, setHeroSlide] = useState(0);
+    const heroTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const resetHeroTimer = useCallback(() => {
+        if (heroTimer.current) clearInterval(heroTimer.current);
+        heroTimer.current = setInterval(() => setHeroSlide((s) => (s + 1) % heroSlides.length), 5000);
+    }, []);
+
+    useEffect(() => {
+        resetHeroTimer();
+        return () => { if (heroTimer.current) clearInterval(heroTimer.current); };
+    }, [resetHeroTimer]);
+
+    function goPrev() { setHeroSlide((s) => (s - 1 + heroSlides.length) % heroSlides.length); resetHeroTimer(); }
+    function goNext() { setHeroSlide((s) => (s + 1) % heroSlides.length); resetHeroTimer(); }
+
+    // Package image lightbox
+    const [lightboxPkg, setLightboxPkg] = useState<DbPackage | null>(null);
+    const [zoomScale, setZoomScale] = useState(1);
+
+    function openLightbox(pkg: DbPackage) { setLightboxPkg(pkg); setZoomScale(1); }
+    function closeLightbox() { setLightboxPkg(null); setZoomScale(1); }
+    function zoomIn()  { setZoomScale((z) => Math.min(z + 0.25, 3)); }
+    function zoomOut() { setZoomScale((z) => Math.max(z - 0.25, 0.5)); }
 
     function openLogin() {
         setAuthTab('login');
@@ -375,70 +410,126 @@ export default function Welcome({ destinations, packages, experiences }: Welcome
                 )}
             </header>
 
-            {/* ── HERO ───────────────────────────────────────────────────── */}
-            <section
-                id="hero"
-                className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-teal-900 to-slate-800 pt-16"
-            >
-                {/* Background pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-20 left-10 h-64 w-64 rounded-full bg-teal-400 blur-3xl" />
-                    <div className="absolute right-10 bottom-20 h-80 w-80 rounded-full bg-blue-400 blur-3xl" />
-                </div>
+            {/* ── HERO SLIDER ────────────────────────────────────────────── */}
+            <section id="hero" className="relative min-h-screen overflow-hidden pt-16">
+                {/* Slides */}
+                <div className="relative h-screen w-full">
+                    {heroSlides.map((slide, i) => (
+                        <div
+                            key={i}
+                            className={`absolute inset-0 transition-opacity duration-700 ${i === heroSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                        >
+                            {/* Background: real image or placeholder */}
+                            {slide.image ? (
+                                <img src={slide.image} alt={slide.tag} className="h-full w-full object-cover" />
+                            ) : (
+                                <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-teal-900 to-slate-800">
+                                    {/* Placeholder blobs */}
+                                    <div className="absolute inset-0 opacity-10 pointer-events-none">
+                                        <div className="absolute top-20 left-10 h-64 w-64 rounded-full bg-teal-400 blur-3xl" />
+                                        <div className="absolute right-10 bottom-20 h-80 w-80 rounded-full bg-blue-400 blur-3xl" />
+                                    </div>
+                                    {/* Placeholder label */}
+                                    <div className="relative z-10 flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-white/20 px-10 py-8 text-white/40">
+                                        <svg className="h-12 w-12" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V9.75M8.25 6.75h.008v.008H8.25V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                        </svg>
+                                        <p className="text-sm font-medium">Slide {i + 1} — Upload your image here</p>
+                                        <p className="text-xs">Set <code className="rounded bg-white/10 px-1">heroSlides[{i}].image</code> to your image URL</p>
+                                    </div>
+                                </div>
+                            )}
 
-                <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-                    <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-teal-400">
-                        Pakistan's Trusted Travel Partner
-                    </p>
-                    <h1 className="mb-4 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-                        AL Abrar Group
-                        <br />
-                        <span className="text-teal-400">of Travels</span>
-                    </h1>
-                    <p className="mx-auto mb-8 max-w-xl text-base text-gray-300 md:text-lg">
-                        Your gateway to the world — Umrah packages, international tours, airline tickets, visa services
-                        and hotel bookings at unbeatable PKR prices.
-                    </p>
+                            {/* Dark overlay */}
+                            <div className="absolute inset-0 bg-black/45" />
 
-                    {/* CTA Buttons */}
-                    {auth.user ? (
-                        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                            <Link
-                                href={route('dashboard')}
-                                className="rounded-full bg-teal-500 px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-teal-400"
-                            >
-                                Go to Dashboard
-                            </Link>
+                            {/* Text content */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="mx-auto max-w-5xl px-4 text-center">
+                                    <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-teal-300">
+                                        {slide.tag}
+                                    </p>
+                                    <h1 className="mb-5 whitespace-pre-line text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                                        {slide.title.split('\n').map((line, li) => (
+                                            <span key={li}>
+                                                {li === 1 ? <span className="text-teal-400">{line}</span> : line}
+                                                {li === 0 && <br />}
+                                            </span>
+                                        ))}
+                                    </h1>
+                                    <p className="mx-auto mb-8 max-w-2xl text-base text-gray-200 md:text-lg">
+                                        {slide.subtitle}
+                                    </p>
+                                    {auth.user ? (
+                                        <Link
+                                            href={route('dashboard')}
+                                            className="rounded-full bg-teal-500 px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-teal-400"
+                                        >
+                                            Go to Dashboard
+                                        </Link>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                            <button
+                                                onClick={openRegister}
+                                                className="rounded-full bg-teal-500 px-8 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-teal-400"
+                                            >
+                                                Start Your Journey
+                                            </button>
+                                            <button
+                                                onClick={openLogin}
+                                                className="rounded-full border-2 border-white/50 px-8 py-3 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+                                            >
+                                                Sign In
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    ))}
+
+                    {/* Prev / Next arrows */}
+                    <button
+                        onClick={goPrev}
+                        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-sm transition hover:bg-black/60 md:left-8 md:p-3"
+                        aria-label="Previous slide"
+                    >
+                        <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                        onClick={goNext}
+                        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-sm transition hover:bg-black/60 md:right-8 md:p-3"
+                        aria-label="Next slide"
+                    >
+                        <ChevronRight className="h-6 w-6" />
+                    </button>
+
+                    {/* Dot indicators */}
+                    <div className="absolute bottom-20 left-0 z-20 flex w-full justify-center gap-2">
+                        {heroSlides.map((_, i) => (
                             <button
-                                onClick={openRegister}
-                                className="rounded-full bg-teal-500 px-8 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-teal-400"
-                            >
-                                Start Your Journey
-                            </button>
-                            <button
-                                onClick={openLogin}
-                                className="rounded-full border-2 border-white/40 px-8 py-3 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
-                            >
-                                Sign In
-                            </button>
-                        </div>
-                    )}
+                                key={i}
+                                onClick={() => { setHeroSlide(i); resetHeroTimer(); }}
+                                className={`h-2 rounded-full transition-all ${i === heroSlide ? 'w-7 bg-teal-400' : 'w-2 bg-white/50 hover:bg-white/80'}`}
+                                aria-label={`Go to slide ${i + 1}`}
+                            />
+                        ))}
+                    </div>
 
                     {/* Stats bar */}
-                    <div className="mx-auto mt-14 grid max-w-2xl grid-cols-3 gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                        {[
-                            { value: '10,000+', label: 'Happy Travelers' },
-                            { value: '50+', label: 'Destinations' },
-                            { value: '15 Years', label: 'Experience' },
-                        ].map((s) => (
-                            <div key={s.label} className="text-center">
-                                <p className="text-xl font-bold text-teal-400 sm:text-2xl">{s.value}</p>
-                                <p className="text-xs text-gray-400 sm:text-sm">{s.label}</p>
-                            </div>
-                        ))}
+                    <div className="absolute bottom-6 left-0 z-20 w-full px-4">
+                        <div className="mx-auto grid max-w-2xl grid-cols-3 gap-4 rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur-sm">
+                            {[
+                                { value: '10,000+', label: 'Happy Travelers' },
+                                { value: '50+', label: 'Destinations' },
+                                { value: '15 Years', label: 'Experience' },
+                            ].map((s) => (
+                                <div key={s.label} className="text-center">
+                                    <p className="text-xl font-bold text-teal-400 sm:text-2xl">{s.value}</p>
+                                    <p className="text-xs text-gray-300 sm:text-sm">{s.label}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -484,8 +575,16 @@ export default function Welcome({ destinations, packages, experiences }: Welcome
                     <div className="grid items-center gap-10 md:grid-cols-2">
                         {/* Visual */}
                         <div className="relative">
-                            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-400 to-blue-600 p-1 shadow-xl">
-                                <div className="flex h-72 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500/90 to-blue-700/90 md:h-96">
+                            <div
+                                className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-400 to-blue-600 p-1 shadow-xl relative"
+                                style={{
+                                    backgroundImage: "url('/storage/front/about.jpg')",
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-teal-400  opacity-0 pointer-events-none" />
+                                <div className="flex h-72 items-center justify-center rounded-3xl from-teal-500/90 to-blue-700/90 md:h-96">
                                     <div className="text-center text-white">
                                         <div className="mb-4 text-7xl">✈️</div>
                                         <p className="text-lg font-semibold">Explore the World</p>
@@ -603,9 +702,25 @@ export default function Welcome({ destinations, packages, experiences }: Welcome
                                     key={pkg.id}
                                     className="overflow-hidden rounded-2xl bg-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg"
                                 >
-                                    <div className="h-44 w-full bg-gray-200">
+                                    {/* Clickable image */}
+                                    <div
+                                        className="group relative w-full cursor-zoom-in overflow-hidden bg-gray-200"
+                                        style={{ height: '500px' }}
+                                        onClick={() => pkg.image_url && openLightbox(pkg)}
+                                        title="Click to zoom"
+                                    >
                                         {pkg.image_url && (
-                                            <img src={pkg.image_url} alt={pkg.name} className="h-full w-full object-cover" />
+                                            <img
+                                                src={pkg.image_url}
+                                                alt={pkg.name}
+                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        )}
+                                        {/* Zoom hint overlay */}
+                                        {pkg.image_url && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/20">
+                                                <ZoomIn className="h-8 w-8 text-white opacity-0 drop-shadow transition-opacity group-hover:opacity-100" />
+                                            </div>
                                         )}
                                     </div>
                                     <div className="p-5">
@@ -666,36 +781,91 @@ export default function Welcome({ destinations, packages, experiences }: Welcome
                 </div>
             </section>
 
-            {/* ── TESTIMONIALS ───────────────────────────────────────────── */}
-            <section className="bg-gray-50 py-20">
-                <div className="mx-auto max-w-7xl px-4 md:px-6">
-                    <div className="mb-12 text-center">
+            {/* ── HOTELS ─────────────────────────────────────────────────── */}
+            {hotelImages.length > 0 && (
+                <section className="bg-gray-50 py-20">
+                    <div className="mx-auto max-w-7xl px-4 md:px-6">
+                        <div className="mb-12 text-center">
+                            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-teal-600">
+                                Accommodation
+                            </p>
+                            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Hotels</h2>
+                            <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-500" />
+                        </div>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {hotelImages.map((h) => (
+                                <div
+                                    key={h.id}
+                                    className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                                >
+                                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                                        {h.image_url ? (
+                                            <img
+                                                src={h.image_url}
+                                                alt={h.name}
+                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center text-gray-300">
+                                                <Building2 className="h-12 w-12" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="font-semibold text-gray-900 line-clamp-1">{h.name}</h3>
+                                        <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
+                                            <MapPin className="h-3.5 w-3.5 text-teal-500" />
+                                            <span>{h.city_name}</span>
+                                        </div>
+                                        <p className="mt-3 text-lg font-bold text-teal-600">
+                                            PKR {Number(h.price).toLocaleString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ── FLIGHT PARTNERS ────────────────────────────────────────── */}
+            <section className="bg-gray-50 py-16">
+                <div className="mx-auto max-w-5xl px-4 md:px-6">
+                    <div className="mb-10 text-center">
                         <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-teal-600">
-                            What Our Clients Say
+                            Accreditations &amp; Partners
                         </p>
-                        <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
-                            Our Clients are Important to Us
-                        </h2>
+                        <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Our Flight Partners</h2>
                         <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-500" />
                     </div>
 
-                    <div className="grid gap-6 md:grid-cols-3">
-                        {testimonials.map((t) => (
-                            <div key={t.name} className="rounded-2xl bg-white p-6 shadow-sm">
-                                <div className="mb-3 flex gap-0.5">
-                                    {Array.from({ length: t.stars }).map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                                    ))}
-                                </div>
-                                <p className="mb-4 text-sm leading-relaxed text-gray-600 italic">{t.text}</p>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-base font-bold text-teal-700">
-                                        {t.name[0]}
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+                        {partners.map((p) => (
+                            <div
+                                key={p.name}
+                                className="flex flex-col items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-8 shadow-sm transition hover:shadow-md"
+                            >
+                                {/* Logo area */}
+                                {p.image ? (
+                                    <img
+                                        src={p.image}
+                                        alt={p.name}
+                                        className="h-24 w-auto object-contain"
+                                    />
+                                ) : (
+                                    /* Placeholder until real logo is supplied */
+                                    <div className="flex h-24 w-36 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 text-gray-300">
+                                        <svg className="mb-1 h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V9.75" />
+                                        </svg>
+                                        <span className="text-xs">Upload logo</span>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                                        <p className="text-xs text-gray-400">{t.role}</p>
-                                    </div>
+                                )}
+
+                                {/* Name + full name */}
+                                <div className="text-center">
+                                    <p className="text-xl font-extrabold tracking-wide text-gray-900">{p.name}</p>
+                                    <p className="mt-1 text-xs leading-snug text-gray-500">{p.fullName}</p>
                                 </div>
                             </div>
                         ))}
@@ -825,6 +995,69 @@ export default function Welcome({ destinations, packages, experiences }: Welcome
                     </div>
                 </div>
             </footer>
+
+            {/* ── PACKAGE IMAGE LIGHTBOX ─────────────────────────────────── */}
+            {lightboxPkg && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+                    onClick={closeLightbox}
+                >
+                    {/* Panel — stop propagation so inner clicks don't close */}
+                    <div
+                        className="relative flex max-h-[90vh] max-w-[90vw] flex-col items-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Top bar */}
+                        <div className="mb-3 flex w-full items-center justify-between gap-4 px-1">
+                            <p className="truncate text-sm font-semibold text-white">{lightboxPkg.name}</p>
+                            <div className="flex items-center gap-2">
+                                {/* Zoom controls */}
+                                <button
+                                    onClick={zoomOut}
+                                    disabled={zoomScale <= 0.5}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:opacity-40"
+                                    title="Zoom out"
+                                >
+                                    <ZoomOut className="h-4 w-4" />
+                                </button>
+                                <span className="w-12 text-center text-xs text-white/70">{Math.round(zoomScale * 100)}%</span>
+                                <button
+                                    onClick={zoomIn}
+                                    disabled={zoomScale >= 3}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:opacity-40"
+                                    title="Zoom in"
+                                >
+                                    <ZoomIn className="h-4 w-4" />
+                                </button>
+                                {/* Close */}
+                                <button
+                                    onClick={closeLightbox}
+                                    className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-red-500"
+                                    title="Close"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Scrollable image container */}
+                        <div className="overflow-auto rounded-xl" style={{ maxHeight: 'calc(90vh - 80px)', maxWidth: '90vw' }}>
+                            <img
+                                src={lightboxPkg.image_url}
+                                alt={lightboxPkg.name}
+                                style={{ transform: `scale(${zoomScale})`, transformOrigin: 'top left', transition: 'transform 0.2s ease' }}
+                                className="block max-w-none rounded-xl"
+                                draggable={false}
+                            />
+                        </div>
+
+                        {/* Price tag */}
+                        <div className="mt-3 rounded-full bg-teal-600 px-5 py-1.5 text-sm font-bold text-white shadow">
+                            Starting from {lightboxPkg.price}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── AUTH MODAL ─────────────────────────────────────────────── */}
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>

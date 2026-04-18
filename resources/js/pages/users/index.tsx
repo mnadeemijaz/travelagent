@@ -88,13 +88,15 @@ export default function UsersIndex({ users, flash }: Props) {
                                             <Button variant="outline" size="sm" asChild>
                                                 <Link href={`/users/${user.id}/edit`}>Edit</Link>
                                             </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => handleDelete(user.id, user.name)}
-                                            >
-                                                Delete
-                                            </Button>
+                                            {!(user.roles.includes('admin')) && (
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(user.id, user.name)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

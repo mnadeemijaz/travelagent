@@ -112,8 +112,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     </form>
                 </div>
-
-                <DeleteUser />
+                {!(Array.isArray(auth.user.roles) && (auth.user.roles as string[]).includes('admin')) && (
+                    <DeleteUser />
+                )}
             </SettingsLayout>
         </AppLayout>
     );

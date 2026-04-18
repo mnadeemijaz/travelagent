@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Client;
+use App\Models\Transaction;
 
 class User extends Authenticatable
 {
@@ -45,5 +47,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function clients()
+    {
+        return $this->hasMany(Client::class, 'agent_id');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'account_id');
     }
 }
