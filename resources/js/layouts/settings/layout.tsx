@@ -2,8 +2,8 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 
 const accountNavItems: NavItem[] = [
     { title: 'Profile',    url: '/settings/profile',    icon: null },
@@ -16,19 +16,12 @@ const adminNavItems: NavItem[] = [
     { title: 'Tour Packages', url: '/admin/packages',      icon: null },
     { title: 'Gallery',       url: '/admin/experiences',   icon: null },
     { title: 'Hotel Image',   url: '/admin/hotel-images',  icon: null },
-    { title: 'Hotels',        url: '/admin/hotels',        icon: null },
-    { title: 'Flights',       url: '/admin/flights',       icon: null },
-    { title: 'Sectors',       url: '/admin/sectors',       icon: null },
-    { title: 'Vehicles',      url: '/admin/vehicles',      icon: null },
-    { title: 'Trips',         url: '/admin/trips',         icon: null },
-    { title: 'Ziarat',        url: '/admin/ziarat',        icon: null },
-    { title: 'Pkg Types',     url: '/admin/tour-packages', icon: null },
-    { title: 'Visa Companies',url: '/admin/visa-companies',icon: null },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
     const currentPath = window.location.pathname;
-
+    const { auth } = usePage<SharedData>().props;
+    const isAgent = auth.roles?.includes('agent');
     return (
         <div className="px-4 py-6">
             <Heading title="Settings" description="Manage your profile and account settings" />
@@ -55,6 +48,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     </nav>
 
                     {/* Admin content */}
+                    {!isAgent && (
                     <div className="mt-4">
                         <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Content
@@ -77,6 +71,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                             ))}
                         </nav>
                     </div>
+                    )}
                 </aside>
 
                 <Separator className="my-6 md:hidden" />

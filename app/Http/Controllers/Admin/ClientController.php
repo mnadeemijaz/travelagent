@@ -17,7 +17,13 @@ class ClientController extends Controller
 
     public function index(Request $request): Response
     {
+        $user  = auth()->user();
         $query = Client::query()->where('isDeleted', 0);
+
+        // Agents only see their own clients
+        if ($user->hasRole('agent')) {
+            $query->where('agent_id', $user->id);
+        }
 
         if ($search = $request->input('searchText')) {
             $query->where(function ($q) use ($search) {
@@ -67,6 +73,11 @@ class ClientController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Agents can only add clients under themselves
+        if (auth()->user()->hasRole('agent')) {
+            $request->merge(['agent_id' => auth()->id()]);
+        }
+
         $validated = $request->validate([
             'name'            => ['required', 'string', 'max:128'],
             'last_name'       => ['nullable', 'string', 'max:128'],
@@ -138,25 +149,25 @@ class ClientController extends Controller
         return redirect()->route('admin.clients.index')->with('success', 'Client deleted.');
     }
 
-    // ── Visa actions ───────────────────────────────────────────────────────────
+    // ── Visa actions (admin-only) ──────────────────────────────────────────────
 
-    public function approveVisa(Request $request): JsonResponse
+    public function approveVisa(Request $request): RedirectResponse
     {
         $request->validate(['id' => ['required', 'integer']]);
-        $rows = Client::where('id', $request->id)->update(['visa_approve' => 'yes']);
+        Client::where('id', $request->id)->update(['visa_approve' => 'yes']);
 
-        return response()->json(['status' => $rows > 0]);
+        return back()->with('success', 'Visa approved.');
     }
 
-    public function rejectVisa(Request $request): JsonResponse
+    public function rejectVisa(Request $request): RedirectResponse
     {
         $request->validate(['id' => ['required', 'integer']]);
-        $rows = Client::where('id', $request->id)->update(['visa_approve' => 'no']);
+        Client::where('id', $request->id)->update(['visa_approve' => 'no']);
 
-        return response()->json(['status' => $rows > 0]);
+        return back()->with('success', 'Visa rejected.');
     }
 
-    public function updateVisa(Request $request): JsonResponse
+    public function updateVisa(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'id'        => ['required', 'integer'],
@@ -164,10 +175,10 @@ class ClientController extends Controller
             'visa_date' => ['required', 'date'],
         ]);
 
-        $rows = Client::where('id', $validated['id'])
-                      ->update(['visa_no' => $validated['visa_no'], 'visa_date' => $validated['visa_date']]);
+        Client::where('id', $validated['id'])
+              ->update(['visa_no' => $validated['visa_no'], 'visa_date' => $validated['visa_date']]);
 
-        return response()->json(['status' => $rows > 0]);
+        return back()->with('success', 'Visa details updated.');
     }
 
     // ── Passport uniqueness check ──────────────────────────────────────────────

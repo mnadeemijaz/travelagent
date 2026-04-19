@@ -25,8 +25,16 @@ class VoucherController extends Controller
 {
     private function sharedData(): array
     {
+        $user = auth()->user();
+
+        // Agents only see themselves in the agent dropdown
+        $agents = $user->hasRole('agent')
+            ? collect([['id' => $user->id, 'name' => $user->name]])
+            : User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->orderBy('name')->get(['id', 'name']);
+
         return [
-            'agents'       => User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->orderBy('name')->get(['id', 'name']),
+            'agents'       => $agents,
+            'isAgent'      => $user->hasRole('agent'),
             'flights'      => Flight::where('isDeleted', 0)->orderBy('name')->get(['id', 'name']),
             'sectors'      => Sector::where('isDeleted', 0)->orderBy('name')->get(['id', 'name']),
             'vehicles'     => Vehicle::where('isDeleted', 0)->orderBy('name')->get(['id', 'name', 'sharing']),
@@ -84,6 +92,11 @@ class VoucherController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Agents can only create vouchers for themselves
+        if (auth()->user()->hasRole('agent')) {
+            $request->merge(['agent_id' => auth()->id()]);
+        }
+
         $validated = $request->validate([
             'agent_id'       => ['required', 'integer'],
             'date'           => ['required', 'date'],
@@ -176,6 +189,11 @@ class VoucherController extends Controller
 
     public function update(Request $request, Voucher $voucher): RedirectResponse
     {
+        // Agents cannot change the agent on a voucher
+        if (auth()->user()->hasRole('agent')) {
+            $request->merge(['agent_id' => auth()->id()]);
+        }
+
         $validated = $request->validate([
             'agent_id'       => ['required', 'integer'],
             'date'           => ['required', 'date'],
@@ -246,27 +264,30 @@ class VoucherController extends Controller
 
     // ── Delete / Cancel ────────────────────────────────────────────────────────
 
-    public function destroy(Voucher $voucher): JsonResponse
+    public function destroy(Voucher $voucher): RedirectResponse
     {
         $voucher->clients()->each(fn($c) => $c->update(['voucher_issue' => 'no']));
         $voucher->update(['isDeleted' => 1]);
-        return response()->json(['status' => true]);
+
+        return back()->with('success', 'Voucher cancelled.');
     }
 
     // ── Approve / Reject ───────────────────────────────────────────────────────
 
-    public function approve(Request $request): JsonResponse
+    public function approve(Request $request): RedirectResponse
     {
         $request->validate(['id' => ['required', 'integer']]);
         Voucher::where('id', $request->id)->update(['approved' => 1]);
-        return response()->json(['status' => true]);
+
+        return back()->with('success', 'Voucher approved.');
     }
 
-    public function reject(Request $request): JsonResponse
+    public function reject(Request $request): RedirectResponse
     {
         $request->validate(['id' => ['required', 'integer']]);
         Voucher::where('id', $request->id)->update(['approved' => 0]);
-        return response()->json(['status' => true]);
+
+        return back()->with('success', 'Voucher rejected.');
     }
 
     // ── Eligible clients for a voucher (AJAX) ─────────────────────────────────

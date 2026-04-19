@@ -42,9 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function VouchersEdit({
-    voucher, agents, flights, sectors, vehicles, trips, hotels, tourPackages, ziarats, selectedClients, selectedZiarats,
+    voucher, agents, isAgent, flights, sectors, vehicles, trips, hotels, tourPackages, ziarats, selectedClients, selectedZiarats,
 }: {
-    voucher: VoucherData; agents: Agent[]; flights: Flight[]; sectors: Sector[];
+    voucher: VoucherData; agents: Agent[]; isAgent: boolean; flights: Flight[]; sectors: Sector[];
     vehicles: Vehicle[]; trips: Trip[]; hotels: Hotel[]; tourPackages: TourPkg[]; ziarats: Ziarat[];
     selectedClients: number[]; selectedZiarats: number[];
 }) {
@@ -122,11 +122,17 @@ export default function VouchersEdit({
                     <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
                         <div className="space-y-1">
                             <Label>Agent / Party</Label>
-                            <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
-                                <option value="">— Select —</option>
-                                {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
-                            </select>
+                            {isAgent ? (
+                                <div className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                                    {agents[0]?.name ?? '—'}
+                                </div>
+                            ) : (
+                                <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                                    <option value="">— Select —</option>
+                                    {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
+                                </select>
+                            )}
                         </div>
                         <div className="space-y-1">
                             <Label>Voucher Date</Label>

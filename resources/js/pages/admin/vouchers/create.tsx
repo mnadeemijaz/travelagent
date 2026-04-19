@@ -31,9 +31,9 @@ const ROOM_TYPES = ['sharing','single_bed','double_bed','triple_bed','quad_bed',
 const emptyHotel = (): HotelRow => ({ city_name: '', city_nights: '0', check_in: '', check_out: '', hotel_id: '', room_type: 'sharing' });
 
 export default function VouchersCreate({
-    agents, flights, sectors, vehicles, trips, hotels, tourPackages, ziarats,
+    agents, isAgent, flights, sectors, vehicles, trips, hotels, tourPackages, ziarats,
 }: {
-    agents: Agent[]; flights: Flight[]; sectors: Sector[]; vehicles: Vehicle[];
+    agents: Agent[]; isAgent: boolean; flights: Flight[]; sectors: Sector[]; vehicles: Vehicle[];
     trips: Trip[]; hotels: Hotel[]; tourPackages: TourPkg[]; ziarats: Ziarat[];
 }) {
     const { data, setData, post, processing, errors } = useForm<{
@@ -50,7 +50,8 @@ export default function VouchersCreate({
         hotels: HotelRow[];
         ziarat_ids: number[];
     }>({
-        agent_id: '', date: new Date().toISOString().substring(0, 10),
+        agent_id: isAgent && agents.length > 0 ? String(agents[0].id) : '',
+        date: new Date().toISOString().substring(0, 10),
         dep_date: '', dep_time: '', arv_date: '', arv_time: '',
         ret_date: '', ret_time: '', ret_pnr_no: '',
         dep_flight: '', dep_flight_no: '', dep_pnr_no: '',
@@ -141,11 +142,17 @@ export default function VouchersCreate({
                     <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
                         <div className="space-y-1">
                             <Label>Agent / Party <span className="text-destructive">*</span></Label>
-                            <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
-                                <option value="">— Select Agent —</option>
-                                {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
-                            </select>
+                            {isAgent ? (
+                                <div className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                                    {agents[0]?.name ?? '—'}
+                                </div>
+                            ) : (
+                                <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                                    <option value="">— Select Agent —</option>
+                                    {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
+                                </select>
+                            )}
                             {errors.agent_id && <p className="text-xs text-destructive">{errors.agent_id}</p>}
                         </div>
                         <div className="space-y-1">

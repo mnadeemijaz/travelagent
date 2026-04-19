@@ -95,7 +95,7 @@ interface DbHotelImage { id: number; name: string; city_name: string; price: num
 const partners = [
     { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
     { name: 'PSA',  fullName: 'Pakistan Survey Authority',               image: "storage/front/psa.png" as string | null },
-    { name: 'ISA',  fullName: 'International Shipping Association',      image: "storage/front/isa.png" as string | null },
+    { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
 ];
 
 // gallery is now DB-driven (passed as prop)
@@ -299,6 +299,11 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     const [lightboxPkg, setLightboxPkg] = useState<DbPackage | null>(null);
     const [zoomScale, setZoomScale] = useState(1);
 
+    // Hotel city tabs
+    const hotelCities = ['All', ...Array.from(new Set(hotelImages.map((h) => h.city_name)))];
+    const [activeCity, setActiveCity] = useState('All');
+    const visibleHotels = activeCity === 'All' ? hotelImages : hotelImages.filter((h) => h.city_name === activeCity);
+
     function openLightbox(pkg: DbPackage) { setLightboxPkg(pkg); setZoomScale(1); }
     function closeLightbox() { setLightboxPkg(null); setZoomScale(1); }
     function zoomIn()  { setZoomScale((z) => Math.min(z + 0.25, 3)); }
@@ -313,7 +318,8 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
         setModalOpen(true);
     }
 
-    const navLinks = ['Home', 'About', 'Destinations', 'Packages', 'Services', 'Contact'];
+    const navLinks = ['Home', 'About', 'Destinations', 'Packages', 'Services','Hotels', 'Contact'];
+    const extraNavLinks = [{ label: 'Group Ticket', href: '/group-tickets' }];
 
     return (
         <>
@@ -346,6 +352,12 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             >
                                 {link}
                             </a>
+                        ))}
+                        {extraNavLinks.map((l) => (
+                            <Link key={l.label} href={l.href}
+                                className="text-sm font-semibold text-teal-600 transition-colors hover:text-teal-700">
+                                {l.label}
+                            </Link>
                         ))}
                     </nav>
 
@@ -396,6 +408,12 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                 >
                                     {link}
                                 </a>
+                            ))}
+                            {extraNavLinks.map((l) => (
+                                <Link key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
+                                    className="text-sm font-semibold text-teal-600">
+                                    {l.label}
+                                </Link>
                             ))}
                             {!auth.user && (
                                 <button
@@ -783,20 +801,40 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
 
             {/* ── HOTELS ─────────────────────────────────────────────────── */}
             {hotelImages.length > 0 && (
-                <section className="bg-gray-50 py-20">
+                <section id="hotels" className="bg-gray-50 py-20">
                     <div className="mx-auto max-w-7xl px-4 md:px-6">
-                        <div className="mb-12 text-center">
+                        {/* Heading */}
+                        <div className="mb-8 text-center">
                             <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-teal-600">
                                 Accommodation
                             </p>
                             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Hotels</h2>
                             <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-500" />
                         </div>
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {hotelImages.map((h) => (
+
+                        {/* City Tabs */}
+                        <div className="mb-8 flex flex-wrap justify-center gap-2">
+                            {hotelCities.map((city) => (
+                                <button
+                                    key={city}
+                                    onClick={() => setActiveCity(city)}
+                                    className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200
+                                        ${activeCity === city
+                                            ? 'bg-teal-600 text-white shadow-md shadow-teal-200'
+                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-teal-400 hover:text-teal-600'
+                                        }`}
+                                >
+                                    {city}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Hotel Cards */}
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                            {visibleHotels.map((h) => (
                                 <div
                                     key={h.id}
-                                    className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                                    className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gray-200">
                                         {h.image_url ? (
@@ -810,6 +848,12 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                                 <Building2 className="h-12 w-12" />
                                             </div>
                                         )}
+                                        {/* City badge */}
+                                        <div className="absolute top-3 left-3">
+                                            <span className="rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
+                                                {h.city_name}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="p-4">
                                         <h3 className="font-semibold text-gray-900 line-clamp-1">{h.name}</h3>
@@ -817,9 +861,17 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                             <MapPin className="h-3.5 w-3.5 text-teal-500" />
                                             <span>{h.city_name}</span>
                                         </div>
-                                        <p className="mt-3 text-lg font-bold text-teal-600">
-                                            PKR {Number(h.price).toLocaleString()}
-                                        </p>
+                                        <div className="mt-3 flex items-center justify-between">
+                                            <p className="text-lg font-bold text-teal-600">
+                                                PKR {Number(h.price).toLocaleString()}
+                                            </p>
+                                            {/* <button
+                                                onClick={openRegister}
+                                                className="rounded-full bg-teal-600 px-3 py-1 text-xs font-semibold text-white hover:bg-teal-700 transition-colors"
+                                            >
+                                                Book
+                                            </button> */}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

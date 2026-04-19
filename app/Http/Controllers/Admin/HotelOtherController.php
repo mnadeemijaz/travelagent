@@ -24,7 +24,24 @@ class HotelOtherController extends Controller
 
     public function dashboard(): Response
     {
+        $user    = auth()->user();
+        $isAgent = $user->hasRole('agent');
+
+        if ($isAgent) {
+            $agentId = $user->id;
+
+            return Inertia::render('dashboard', [
+                'isAgent'             => true,
+                'totalClients'        => Client::where('isDeleted', 0)->where('agent_id', $agentId)->count(),
+                'visaNotApproved'     => Client::where('isDeleted', 0)->where('agent_id', $agentId)->where('visa_approve', 'no')->count(),
+                'totalVouchers'       => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->count(),
+                'approvedVouchers'    => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->where('approved', 1)->count(),
+                'notApprovedVouchers' => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->where('approved', 0)->count(),
+            ]);
+        }
+
         return Inertia::render('dashboard', [
+            'isAgent'             => false,
             'totalClients'        => Client::where('isDeleted', 0)->count(),
             'visaNotApproved'     => Client::where('isDeleted', 0)->where('visa_approve', 'no')->count(),
             'totalVouchers'       => Voucher::where('isDeleted', 0)->count(),

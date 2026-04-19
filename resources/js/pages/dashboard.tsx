@@ -1,11 +1,12 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { BadgeCheck, FileCheck, FileX, ScrollText, Users } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
 interface Props {
+    isAgent: boolean;
     totalClients: number;
     visaNotApproved: number;
     totalVouchers: number;
@@ -30,17 +31,26 @@ function StatCard({ icon: Icon, label, value, href, color }: {
     return href ? <Link href={href}>{inner}</Link> : <div>{inner}</div>;
 }
 
-export default function Dashboard({ totalClients, visaNotApproved, totalVouchers, approvedVouchers, notApprovedVouchers }: Props) {
+export default function Dashboard({ isAgent, totalClients, visaNotApproved, totalVouchers, approvedVouchers, notApprovedVouchers }: Props) {
+    const { auth } = usePage<SharedData>().props;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex flex-col gap-6 p-6">
-                <h1 className="text-2xl font-semibold">Dashboard</h1>
+                <div>
+                    <h1 className="text-2xl font-semibold">Dashboard</h1>
+                    {isAgent && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Welcome, <span className="font-medium">{auth.user.name}</span> — showing your data only.
+                        </p>
+                    )}
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <StatCard
                         icon={Users}
-                        label="Total Clients"
+                        label={isAgent ? 'My Clients' : 'Total Clients'}
                         value={totalClients}
                         href="/admin/clients"
                         color="bg-blue-500"
@@ -49,12 +59,12 @@ export default function Dashboard({ totalClients, visaNotApproved, totalVouchers
                         icon={BadgeCheck}
                         label="Visa Pending"
                         value={visaNotApproved}
-                        href="/admin/clients?visa_approve=no"
+                        href={isAgent ? '/admin/clients?visa_approve=no' : '/admin/clients?visa_approve=no'}
                         color="bg-yellow-500"
                     />
                     <StatCard
                         icon={ScrollText}
-                        label="Total Vouchers"
+                        label={isAgent ? 'My Vouchers' : 'Total Vouchers'}
                         value={totalVouchers}
                         href="/admin/vouchers"
                         color="bg-indigo-500"
