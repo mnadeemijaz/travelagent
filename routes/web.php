@@ -52,9 +52,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('vouchers/reject',  [VoucherController::class, 'reject'])->name('vouchers.reject');
         Route::get ('vouchers/eligible-clients', [VoucherController::class, 'eligibleClients'])->name('vouchers.eligible-clients');
 
-        // Ticket Sales
-        Route::resource('ticket-sales', TicketSaleController::class)->except(['show']);
-
         // Clients (agents can add/edit their own clients and check passport)
         Route::resource('clients', ClientController::class)->except(['show']);
         Route::post('clients/check-passport', [ClientController::class, 'checkPassportNo'])->name('clients.check-passport');
@@ -63,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     // ── Admin-only routes (agents get 403) ────────────────────────────────────
     Route::middleware(['not.agent'])->group(function () {
         Route::resource('users', UserManagementController::class)->except(['show']);
+        Route::post('users/{user}/approve', [UserManagementController::class, 'approve'])->name('users.approve');
 
         Route::prefix('admin')->name('admin.')->group(function () {
             // ── Website content ──────────────────────────────────────────────
@@ -173,6 +171,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('transactions/balance', [TransactionController::class, 'balance'])->name('transactions.balance');
             Route::get('transactions/agent/{agentId}', [TransactionController::class, 'index'])->name('transactions.by-agent');
             Route::resource('transactions', TransactionController::class)->except(['show']);
+            // Ticket Sales
+        Route::resource('ticket-sales', TicketSaleController::class)->except(['show']);
         });
     });
 });

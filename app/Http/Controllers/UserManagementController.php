@@ -17,18 +17,21 @@ class UserManagementController extends Controller
     public function index(): Response
     {
         $users = User::with('roles')
+            ->orderBy('is_approved')   // unapproved first
             ->orderBy('id')
             ->get()
             ->map(fn (User $user) => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'roles'      => $user->roles->pluck('name'),
-                'created_at' => $user->created_at->toDateString(),
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'roles'       => $user->roles->pluck('name'),
+                'is_approved' => $user->is_approved,
+                'created_at'  => $user->created_at->toDateString(),
             ]);
 
         return Inertia::render('users/index', [
             'users' => $users,
+            'flash' => session()->only(['success']),
         ]);
     }
 
@@ -49,9 +52,10 @@ class UserManagementController extends Controller
         ]);
 
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'password'    => Hash::make($validated['password']),
+            'is_approved' => true,   // admin-created users are auto-approved
         ]);
 
         $user->assignRole($validated['role']);
@@ -90,6 +94,13 @@ class UserManagementController extends Controller
         $user->syncRoles([$validated['role']]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
+    }
+
+    public function approve(User $user): RedirectResponse
+    {
+        $user->update(['is_approved' => true]);
+
+        return back()->with('success', "'{$user->name}' approved. They can now log in.");
     }
 
     public function destroy(User $user): RedirectResponse

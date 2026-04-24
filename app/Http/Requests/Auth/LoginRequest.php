@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Block unapproved users
+        if (! Auth::user()->is_approved) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account is pending admin approval. Please wait for approval before logging in.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

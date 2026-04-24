@@ -32,7 +32,6 @@ const allMainNavItems: NavItem[] = [
 const agentNavItems: NavItem[] = [
     { title: 'Client Management', url: '/admin/clients',      icon: BadgeCheck },
     { title: 'Vouchers',          url: '/admin/vouchers',     icon: ScrollText },
-    { title: 'Ticket Sales',      url: '/admin/ticket-sales', icon: Ticket },
 ];
 
 const reportNavItems: NavItem[] = [
