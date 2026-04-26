@@ -9,7 +9,11 @@ class GroupTicketBooking extends Model
 {
     protected $fillable = [
         'group_ticket_id', 'user_id', 'passengers',
-        'contact_phone', 'notes', 'status',
+        'contact_phone', 'notes', 'status', 'expires_at',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
     ];
 
     public function ticket(): BelongsTo

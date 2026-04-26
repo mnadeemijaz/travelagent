@@ -27,11 +27,13 @@ const allMainNavItems: NavItem[] = [
     { title: 'Bank Transactions',    url: '/admin/bank-transections',      icon: ArrowLeftRight },
     { title: 'Group Tickets',        url: '/admin/group-tickets',          icon: Ticket },
     { title: 'Group Bookings',       url: '/admin/group-ticket-bookings',  icon: Ticket },
+    { title: 'Bank Details',         url: '/admin/bank-details',           icon: Landmark },
 ];
 
 const agentNavItems: NavItem[] = [
-    { title: 'Client Management', url: '/admin/clients',      icon: BadgeCheck },
-    { title: 'Vouchers',          url: '/admin/vouchers',     icon: ScrollText },
+    { title: 'Client Management', url: '/admin/clients',             icon: BadgeCheck },
+    { title: 'Vouchers',          url: '/admin/vouchers',            icon: ScrollText },
+    { title: 'Group Bookings',    url: '/admin/group-ticket-bookings', icon: Ticket },
 ];
 
 const reportNavItems: NavItem[] = [

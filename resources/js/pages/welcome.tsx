@@ -90,12 +90,14 @@ interface DbDestination { id: number; name: string; country: string | null; pric
 interface DbPackage    { id: number; name: string; price: string; image_url: string; }
 interface DbExperience  { id: number; name: string; image_url: string; }
 interface DbHotelImage { id: number; name: string; city_name: string; price: number; image_url: string; }
+interface CompanyConfig { company_name: string; address: string | null; tagline: string | null; phone: string | null; email: string | null; }
 
 // Flight / travel partners — set `image` to your logo URL when ready
 const partners = [
     { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
     { name: 'PSA',  fullName: 'Pakistan Survey Authority',               image: "storage/front/psa.png" as string | null },
     { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
+    { name: 'TAAP',  fullName: 'Travel Agents Association of Pakistan',       image: "storage/front/taap.png" as string | null },
 ];
 
 // gallery is now DB-driven (passed as prop)
@@ -270,9 +272,10 @@ interface WelcomeProps {
     packages: DbPackage[];
     experiences: DbExperience[];
     hotelImages: DbHotelImage[];
+    companyConfig: CompanyConfig;
 }
 
-export default function Welcome({ destinations, packages, experiences, hotelImages }: WelcomeProps) {
+export default function Welcome({ destinations, packages, experiences, hotelImages, companyConfig }: WelcomeProps) {
     const { auth } = usePage<SharedData>().props;
     const [mobileOpen, setMobileOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
@@ -319,7 +322,10 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     }
 
     const navLinks = ['Home', 'About', 'Destinations', 'Packages', 'Services','Hotels', 'Contact'];
-    const extraNavLinks = [{ label: 'Group Ticket', href: '/group-tickets' }];
+    const extraNavLinks = [
+        { label: 'Group Ticket', href: '/group-tickets' },
+        ...(auth.user ? [{ label: 'Bank Details', href: '/bank-details' }] : []),
+    ];
 
     return (
         <>
@@ -891,7 +897,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                         <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-500" />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-4">
                         {partners.map((p) => (
                             <div
                                 key={p.name}
@@ -961,24 +967,32 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600">
                                     <Plane className="h-4 w-4 text-white" />
                                 </div>
-                                <p className="font-bold text-white">AL Abrar Group of Travels</p>
+                                <p className="font-bold text-white">
+                                    {companyConfig.company_name || 'AL Abrar Group of Travels'}
+                                </p>
                             </div>
-                            <p className="mb-4 text-sm leading-relaxed">
-                                Your trusted partner for Umrah, international tours, airline tickets and visa services.
-                            </p>
+                            {companyConfig.tagline && (
+                                <p className="mb-4 text-sm leading-relaxed">{companyConfig.tagline}</p>
+                            )}
                             <ul className="space-y-2 text-sm">
-                                <li className="flex items-start gap-2">
-                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-500" />
-                                    Main Bazaar, Near Telecom Exchange, Islamabad
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 shrink-0 text-teal-500" />
-                                    +92 311 1234567
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 shrink-0 text-teal-500" />
-                                    info@alabrartravels.com
-                                </li>
+                                {companyConfig.address && (
+                                    <li className="flex items-start gap-2">
+                                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-500" />
+                                        {companyConfig.address}
+                                    </li>
+                                )}
+                                {companyConfig.phone && (
+                                    <li className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4 shrink-0 text-teal-500" />
+                                        {companyConfig.phone}
+                                    </li>
+                                )}
+                                {companyConfig.email && (
+                                    <li className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 shrink-0 text-teal-500" />
+                                        {companyConfig.email}
+                                    </li>
+                                )}
                             </ul>
                         </div>
 
@@ -1036,7 +1050,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                     </div>
 
                     <div className="mt-10 border-t border-gray-800 pt-5 text-center text-xs">
-                        © {new Date().getFullYear()} AL Abrar Group of Travels. All rights reserved. |{' '}
+                        © {new Date().getFullYear()} {companyConfig.company_name || 'AL Abrar Group of Travels'}. All rights reserved. |{' '}
                         <a href="#" className="hover:text-teal-400">
                             Privacy Policy
                         </a>{' '}

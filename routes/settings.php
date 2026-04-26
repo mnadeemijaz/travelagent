@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ConfigurationController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -18,4 +19,10 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+    // Admin-only: company configuration
+    Route::middleware(['not.agent'])->post(
+        'admin/configurations',
+        [ConfigurationController::class, 'update']
+    )->name('admin.configurations.update');
 });

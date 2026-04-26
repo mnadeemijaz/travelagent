@@ -22,7 +22,8 @@ class GroupTicketPublicController extends Controller
             ->where('is_active', true)
             ->where('category', $category)
             ->withSum(
-                ['bookings as booked_seats' => fn ($q) => $q->whereIn('status', ['pending', 'approved'])],
+                ['bookings as booked_seats' => fn ($q) => $q->whereIn('status', ['pending', 'approved'])
+                    ->where(fn ($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))],
                 'passengers'
             )
             ->orderBy('dep_date')
@@ -52,6 +53,7 @@ class GroupTicketPublicController extends Controller
         // Calculate remaining seats at booking time
         $booked = GroupTicketBooking::where('group_ticket_id', $groupTicket->id)
             ->whereIn('status', ['pending', 'approved'])
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->sum('passengers');
 
         $remaining = $groupTicket->seats_available - (int) $booked;
@@ -69,8 +71,9 @@ class GroupTicketPublicController extends Controller
             'contact_phone'   => $validated['contact_phone'],
             'notes'           => $validated['notes'] ?? null,
             'status'          => 'pending',
+            'expires_at'      => now()->addHour(),
         ]);
 
-        return back()->with('success', 'Booking submitted! We will contact you shortly.');
+        return back()->with('success', 'Booking submitted! Please complete your payment within 1 hour to confirm your seat.');
     }
 }

@@ -108,11 +108,12 @@ export default function TicketSaleForm({
                 </div>
                 <div className="space-y-1">
                     <Label>Category <span className="text-destructive">*</span></Label>
-                    <select value={data.category} onChange={e => setData('category', e.target.value)}
+                    <Input placeholder="e.g. Economy" value={data.category} onChange={e => setData('category', e.target.value)}  />
+                    {/* <select value={data.category} onChange={e => setData('category', e.target.value)}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
                         <option value="">— Select Category —</option>
                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    </select> */}
                     {errors.category && <p className="text-xs text-destructive">{errors.category}</p>}
                 </div>
                 <div className="space-y-1">

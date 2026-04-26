@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import CompanyConfigurationForm, { type CompanyConfig } from '@/pages/admin/configurations/index';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,8 +20,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+interface ProfileProps {
+    mustVerifyEmail: boolean;
+    status?: string;
+    configSaved?: boolean;
+    configuration?: CompanyConfig;
+}
+
+export default function Profile({ mustVerifyEmail, status, configSaved, configuration }: ProfileProps) {
     const { auth } = usePage<SharedData>().props;
+    const isAdmin = auth.roles.includes('admin');
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
         name: auth.user.name,
@@ -112,9 +121,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     </form>
                 </div>
-                {!(Array.isArray(auth.user.roles) && (auth.user.roles as string[]).includes('admin')) && (
-                    <DeleteUser />
+                {isAdmin && configuration && (
+                    <>
+                        <div className="border-t pt-6" />
+                        <CompanyConfigurationForm
+                            configuration={configuration}
+                            configSaved={configSaved}
+                        />
+                    </>
                 )}
+
+                {!isAdmin && <DeleteUser />}
             </SettingsLayout>
         </AppLayout>
     );

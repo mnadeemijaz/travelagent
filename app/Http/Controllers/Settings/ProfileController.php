@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\CompanyConfiguration;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,9 +19,19 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $config = CompanyConfiguration::instance();
+
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+            'status'          => $request->session()->get('status'),
+            'configSaved'     => $request->session()->get('configSaved', false),
+            'configuration'   => [
+                'company_name' => $config->company_name,
+                'address'      => $config->address ?? '',
+                'tagline'      => $config->tagline ?? '',
+                'phone'        => $config->phone ?? '',
+                'email'        => $config->email ?? '',
+            ],
         ]);
     }
 
@@ -45,6 +56,10 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if ($request->user()->hasRole('admin')) {
+            return back()->withErrors(['password' => 'Admin accounts cannot be deleted.']);
+        }
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AgentHotelController;
+use App\Http\Controllers\Admin\BankDetailController;
 use App\Http\Controllers\Admin\GroupTicketController;
 use App\Http\Controllers\GroupTicketPublicController;
 use App\Http\Controllers\Admin\BankTransectionController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\UserManagementController;
+use App\Models\BankDetail;
+use App\Models\CompanyConfiguration;
 use App\Models\Destination;
 use App\Models\Experience;
 use App\Models\HotelImage;
@@ -28,7 +31,23 @@ use Inertia\Inertia;
 Route::get('/group-tickets', [GroupTicketPublicController::class, 'index'])->name('group-tickets.index');
 Route::middleware(['auth'])->post('/group-tickets/{groupTicket}/book', [GroupTicketPublicController::class, 'book'])->name('group-tickets.book');
 
+// ── Bank details (auth required) ──────────────────────────────────────────────
+Route::middleware(['auth'])->get('/bank-details', function () {
+    return Inertia::render('bank-details', [
+        'bankDetails' => BankDetail::where('active', true)->orderByDesc('id')->get()->map(fn ($b) => [
+            'id'                  => $b->id,
+            'bank_name'           => $b->bank_name,
+            'account_holder_name' => $b->account_holder_name,
+            'account_number'      => $b->account_number,
+            'iban_number'         => $b->iban_number,
+            'logo_url'            => $b->logo_url,
+        ]),
+    ]);
+})->name('bank-details.index');
+
 Route::get('/', function () {
+    $config = CompanyConfiguration::instance();
+
     return Inertia::render('welcome', [
         'destinations' => Destination::where('active', true)->orderByDesc('id')->get()
             ->map(fn ($d) => ['id' => $d->id, 'name' => $d->name, 'country' => $d->country, 'price' => $d->price, 'image_url' => $d->image_url]),
@@ -38,6 +57,13 @@ Route::get('/', function () {
             ->map(fn ($e) => ['id' => $e->id, 'name' => $e->name, 'image_url' => $e->image_url]),
         'hotelImages' => HotelImage::where('active', true)->orderByDesc('id')->get()
             ->map(fn ($h) => ['id' => $h->id, 'name' => $h->name, 'city_name' => $h->city_name, 'price' => $h->price, 'image_url' => $h->image_url]),
+        'companyConfig' => [
+            'company_name' => $config->company_name,
+            'address'      => $config->address,
+            'tagline'      => $config->tagline,
+            'phone'        => $config->phone,
+            'email'        => $config->email,
+        ],
     ]);
 })->name('home');
 
@@ -55,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
         // Clients (agents can add/edit their own clients and check passport)
         Route::resource('clients', ClientController::class)->except(['show']);
         Route::post('clients/check-passport', [ClientController::class, 'checkPassportNo'])->name('clients.check-passport');
+
+        // Group ticket bookings — all roles see their own bookings; admin sees all
+        Route::get('group-ticket-bookings', [GroupTicketController::class, 'bookings'])->name('group-ticket-bookings.index');
     });
 
     // ── Admin-only routes (agents get 403) ────────────────────────────────────
@@ -147,9 +176,11 @@ Route::middleware(['auth'])->group(function () {
             // ── Bank Transactions ──────────────────────────────────────────────────
             Route::resource('bank-transections', BankTransectionController::class)->except(['show']);
 
+            // ── Bank Details (public-facing payment info) ──────────────────────────
+            Route::resource('bank-details', BankDetailController::class)->except(['show']);
+
             // ── Group Tickets ──────────────────────────────────────────────────────
             Route::resource('group-tickets', GroupTicketController::class)->except(['show']);
-            Route::get ('group-ticket-bookings',                [GroupTicketController::class, 'bookings'])->name('group-ticket-bookings.index');
             Route::post('group-ticket-bookings/{booking}/approve', [GroupTicketController::class, 'approveBooking'])->name('group-ticket-bookings.approve');
             Route::post('group-ticket-bookings/{booking}/reject',  [GroupTicketController::class, 'rejectBooking'])->name('group-ticket-bookings.reject');
 

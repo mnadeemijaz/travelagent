@@ -16,6 +16,7 @@ const adminNavItems: NavItem[] = [
     { title: 'Tour Packages', url: '/admin/packages',      icon: null },
     { title: 'Gallery',       url: '/admin/experiences',   icon: null },
     { title: 'Hotel Image',   url: '/admin/hotel-images',  icon: null },
+    { title: 'Bank Details',  url: '/admin/bank-details',  icon: null },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

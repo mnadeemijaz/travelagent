@@ -105,7 +105,15 @@ class GroupTicketController extends Controller
 
     public function bookings(Request $request): Response
     {
+        $user    = $request->user();
+        $isAdmin = $user->hasRole('admin');
+
         $query = GroupTicketBooking::with(['ticket', 'user']);
+
+        // Non-admin users see only their own bookings
+        if (! $isAdmin) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($status = $request->input('status')) {
             $query->where('status', $status);
@@ -120,12 +128,17 @@ class GroupTicketController extends Controller
             'categories' => self::CATEGORIES,
             'filters'    => $request->only(['status', 'category']),
             'flash'      => session()->only(['success']),
+            'isAdmin'    => $isAdmin,
         ]);
     }
 
     public function approveBooking(GroupTicketBooking $booking): RedirectResponse
     {
-        $booking->update(['status' => 'approved']);
+        if ($booking->status === 'cancelled') {
+            return back()->withErrors(['error' => 'This booking has already been cancelled due to payment timeout.']);
+        }
+
+        $booking->update(['status' => 'approved', 'expires_at' => null]);
         return back()->with('success', 'Booking approved.');
     }
 

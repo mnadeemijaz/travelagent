@@ -423,6 +423,16 @@ export default function GroupTicketsPage({
                             className="text-sm font-semibold text-teal-600 underline underline-offset-4">
                             Group Ticket
                         </Link>
+                        {auth.user ? (
+                            <Link href="/bank-details" className="text-sm font-semibold text-teal-600">Bank Details</Link>
+                        ) : (
+                            <button
+                                onClick={() => { setAuthTab('login'); setAuthModal(true); }}
+                                className="text-sm font-semibold text-teal-600 hover:text-teal-700"
+                            >
+                                Bank Details
+                            </button>
+                        )}
                     </nav>
 
                     <div className="flex items-center gap-2">
@@ -464,6 +474,19 @@ export default function GroupTicketsPage({
                                 className="text-sm font-semibold text-teal-600">
                                 Group Ticket
                             </Link>
+                            {auth.user ? (
+                                <Link href="/bank-details" onClick={() => setMobileOpen(false)}
+                                    className="text-sm font-semibold text-teal-600">
+                                    Bank Details
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={() => { setAuthTab('login'); setAuthModal(true); setMobileOpen(false); }}
+                                    className="text-sm font-semibold text-teal-600 text-left"
+                                >
+                                    Bank Details
+                                </button>
+                            )}
                             {!auth.user && (
                                 <button onClick={() => { setAuthTab('login'); setAuthModal(true); setMobileOpen(false); }}
                                     className="mt-1 rounded-full border border-teal-600 px-4 py-2 text-sm font-medium text-teal-600">
