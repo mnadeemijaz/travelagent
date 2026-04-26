@@ -15,6 +15,6 @@ class Destination extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return $this->image ? asset('storage/' . $this->image) : '';
+        return $this->image ? url('media/' . $this->image) : '';
     }
 }

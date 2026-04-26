@@ -21,6 +21,6 @@ class BankDetail extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo ? asset('storage/' . $this->logo) : null;
+        return $this->logo ? url('media/' . $this->logo) : null;
     }
 }

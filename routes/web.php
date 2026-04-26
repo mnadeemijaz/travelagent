@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AgentHotelController;
 use App\Http\Controllers\Admin\BankDetailController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\GroupTicketController;
 use App\Http\Controllers\GroupTicketPublicController;
 use App\Http\Controllers\Admin\BankTransectionController;
@@ -26,6 +27,11 @@ use App\Models\HotelImage;
 use App\Models\Package;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// ── Media / storage file serving (symlink-free) ──────────────────────────────
+Route::get('/media/{path}', [MediaController::class, 'serve'])
+    ->where('path', '.+')
+    ->name('media.serve');
 
 // ── Public group tickets ───────────────────────────────────────────────────────
 Route::get('/group-tickets', [GroupTicketPublicController::class, 'index'])->name('group-tickets.index');
