@@ -152,13 +152,13 @@ class ReportController extends Controller
                 COALESCE(SUM(CASE WHEN c.age_group = 'Child'  THEN 1 ELSE 0 END), 0) AS t_child,
                 COALESCE(SUM(CASE WHEN c.age_group = 'Infant' THEN 1 ELSE 0 END), 0) AS t_infant
             FROM transactions t
-            LEFT JOIN vouchers v       ON v.id  = t.voucher_id
+            LEFT JOIN vouchers v         ON v.id  = t.voucher_id
             LEFT JOIN voucher_clients vc ON vc.voucher_id = v.id
-            LEFT JOIN clients c        ON c.id  = vc.client_id
+            LEFT JOIN clients c          ON c.id  = vc.client_id
             WHERE t.isDeleted = 0
               AND t.payment_type = 'dr'
               AND t.account_id = ?
-            GROUP BY t.id
+            GROUP BY t.id, t.date, t.detail, t.amount, t.voucher_id
             ORDER BY t.id DESC
         ", [$agentId]);
 

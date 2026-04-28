@@ -27,26 +27,33 @@ class HotelOtherController extends Controller
         $user    = auth()->user();
         $isAgent = $user->hasRole('agent');
 
-        if ($isAgent) {
-            $agentId = $user->id;
+        $cq = Client::where('isDeleted', 0);   // client base query
+        $vq = Voucher::where('isDeleted', 0);   // voucher base query
 
-            return Inertia::render('dashboard', [
-                'isAgent'             => true,
-                'totalClients'        => Client::where('isDeleted', 0)->where('agent_id', $agentId)->count(),
-                'visaNotApproved'     => Client::where('isDeleted', 0)->where('agent_id', $agentId)->where('visa_approve', 'no')->count(),
-                'totalVouchers'       => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->count(),
-                'approvedVouchers'    => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->where('approved', 1)->count(),
-                'notApprovedVouchers' => Voucher::where('isDeleted', 0)->where('agent_id', $agentId)->where('approved', 0)->count(),
-            ]);
+        if ($isAgent) {
+            $cq->where('agent_id', $user->id);
+            $vq->where('agent_id', $user->id);
         }
 
         return Inertia::render('dashboard', [
-            'isAgent'             => false,
-            'totalClients'        => Client::where('isDeleted', 0)->count(),
-            'visaNotApproved'     => Client::where('isDeleted', 0)->where('visa_approve', 'no')->count(),
-            'totalVouchers'       => Voucher::where('isDeleted', 0)->count(),
-            'approvedVouchers'    => Voucher::where('isDeleted', 0)->where('approved', 1)->count(),
-            'notApprovedVouchers' => Voucher::where('isDeleted', 0)->where('approved', 0)->count(),
+            'isAgent' => $isAgent,
+
+            // ── Vouchers ─────────────────────────────────────────────────
+            'totalVouchers'       => (clone $vq)->count(),
+            'approvedVouchers'    => (clone $vq)->where('approved', 1)->count(),
+            'notApprovedVouchers' => (clone $vq)->where('approved', 0)->count(),
+
+            // ── Pilgrims ─────────────────────────────────────────────────
+            'totalPilgrims' => (clone $cq)->count(),
+            'totalAdults'   => (clone $cq)->where('age_group', 'adult')->count(),
+            'totalChild'    => (clone $cq)->where('age_group', 'child')->count(),
+            'totalInfant'   => (clone $cq)->where('age_group', 'infant')->count(),
+
+            // ── Mofa (visa status) ────────────────────────────────────────
+            'mofaApproved'    => (clone $cq)->where('visa_approve', 'yes')->count(),
+            'mofaNotApproved' => (clone $cq)->where('visa_approve', 'no')->count(),
+            'voucherCreated'  => (clone $cq)->where('voucher_issue', 'yes')->count(),
+            'mofaTotal'       => (clone $cq)->count(),
         ]);
     }
 
