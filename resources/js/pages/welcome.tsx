@@ -93,11 +93,18 @@ interface DbHotelImage { id: number; name: string; city_name: string; price: num
 interface CompanyConfig { company_name: string; address: string | null; tagline: string | null; phone: string | null; email: string | null; }
 
 // Flight / travel partners — set `image` to your logo URL when ready
-const partners = [
+const partners1 = [
     { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
     { name: 'PSA',  fullName: 'Pakistan Survey Authority',               image: "storage/front/psa.png" as string | null },
     { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
     { name: 'TAAP',  fullName: 'Travel Agents Association of Pakistan',       image: "storage/front/taap.png" as string | null },
+];
+const partners = [
+    { name: 'Air Arabia', fullName: 'Air Arabia', image: "storage/front/airarabia.png" as string | null },
+    { name: 'Air Sial',  fullName: 'Air Sial',               image: "storage/front/airSial.png" as string | null },
+    { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
+    { name: 'Air Blue',  fullName: 'Air Blue',       image: "storage/front/airblue.png" as string | null },
+    { name: 'Fly Jinah',  fullName: 'Fly Jinah',       image: "storage/front/flyjinah.png" as string | null },
 ];
 
 // gallery is now DB-driven (passed as prop)
@@ -307,6 +314,55 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     const [activeCity, setActiveCity] = useState('All');
     const visibleHotels = activeCity === 'All' ? hotelImages : hotelImages.filter((h) => h.city_name === activeCity);
 
+    // Partners slider — infinite loop via cloned array
+    // We show VISIBLE_PARTNERS cards at a time; slide steps by 1.
+    // Array is tripled so we can seamlessly loop from index N back to 0.
+    const VISIBLE_PARTNERS = 3;
+    const partnerExtended = [...partners, ...partners, ...partners]; // triple
+    const [partnerSlide, setPartnerSlide] = useState(partners.length); // start in the middle copy
+    const [partnerTransition, setPartnerTransition] = useState(true);
+    const partnerTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const resetPartnerTimer = useCallback(() => {
+        if (partnerTimer.current) clearInterval(partnerTimer.current);
+        partnerTimer.current = setInterval(() => setPartnerSlide((s) => s + 1), 3000);
+    }, []);
+
+    useEffect(() => {
+        resetPartnerTimer();
+        return () => { if (partnerTimer.current) clearInterval(partnerTimer.current); };
+    }, [resetPartnerTimer]);
+
+    // After sliding to a clone, silently jump back to the real copy
+    useEffect(() => {
+        if (partnerSlide >= partners.length * 2) {
+            const t = setTimeout(() => {
+                setPartnerTransition(false);
+                setPartnerSlide(partners.length);
+            }, 500);
+            return () => clearTimeout(t);
+        }
+        if (partnerSlide < partners.length) {
+            const t = setTimeout(() => {
+                setPartnerTransition(false);
+                setPartnerSlide(partners.length * 2 - 1);
+            }, 500);
+            return () => clearTimeout(t);
+        }
+    }, [partnerSlide]);
+
+    // Re-enable transition after silent jump
+    useEffect(() => {
+        if (!partnerTransition) {
+            const t = setTimeout(() => setPartnerTransition(true), 50);
+            return () => clearTimeout(t);
+        }
+    }, [partnerTransition]);
+
+    function partnerPrev() { setPartnerSlide((s) => s - 1); resetPartnerTimer(); }
+    function partnerNext() { setPartnerSlide((s) => s + 1); resetPartnerTimer(); }
+    const partnerDotIndex = ((partnerSlide - partners.length) % partners.length + partners.length) % partners.length;
+
     function openLightbox(pkg: DbPackage) { setLightboxPkg(pkg); setZoomScale(1); }
     function closeLightbox() { setLightboxPkg(null); setZoomScale(1); }
     function zoomIn()  { setZoomScale((z) => Math.min(z + 0.25, 3)); }
@@ -323,9 +379,17 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
 
     const navLinks = ['Home', 'About', 'Destinations', 'Packages', 'Services','Hotels', 'Contact'];
     const extraNavLinks = [
-        { label: 'Group Ticket', href: '/group-tickets' },
-        ...(auth.user ? [{ label: 'Bank Details', href: '/bank-details' }] : []),
+        { label: 'Group Ticket', href: '/group-tickets', requiresAuth: false },
+        { label: 'Bank Details', href: '/bank-details', requiresAuth: true },
     ];
+
+    function handleProtectedNav(href: string) {
+        if (auth.user) {
+            window.location.href = href;
+        } else {
+            openLogin();
+        }
+    }
 
     return (
         <>
@@ -360,10 +424,20 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             </a>
                         ))}
                         {extraNavLinks.map((l) => (
-                            <Link key={l.label} href={l.href}
-                                className="text-sm font-semibold text-teal-600 transition-colors hover:text-teal-700">
-                                {l.label}
-                            </Link>
+                            l.requiresAuth ? (
+                                <button
+                                    key={l.label}
+                                    onClick={() => handleProtectedNav(l.href)}
+                                    className="text-sm font-semibold text-teal-600 transition-colors hover:text-teal-700"
+                                >
+                                    {l.label}
+                                </button>
+                            ) : (
+                                <Link key={l.label} href={l.href}
+                                    className="text-sm font-semibold text-teal-600 transition-colors hover:text-teal-700">
+                                    {l.label}
+                                </Link>
+                            )
                         ))}
                     </nav>
 
@@ -416,10 +490,20 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                 </a>
                             ))}
                             {extraNavLinks.map((l) => (
-                                <Link key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
-                                    className="text-sm font-semibold text-teal-600">
-                                    {l.label}
-                                </Link>
+                                l.requiresAuth ? (
+                                    <button
+                                        key={l.label}
+                                        onClick={() => { setMobileOpen(false); handleProtectedNav(l.href); }}
+                                        className="text-sm font-semibold text-teal-600 text-left"
+                                    >
+                                        {l.label}
+                                    </button>
+                                ) : (
+                                    <Link key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
+                                        className="text-sm font-semibold text-teal-600">
+                                        {l.label}
+                                    </Link>
+                                )
                             ))}
                             {!auth.user && (
                                 <button
@@ -659,8 +743,42 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             >
                                 Start Planning →
                             </button>
+
+                            
                         </div>
                     </div>
+                    {/* Accreditation logos */}
+                            <div className="mt-8 border-t border-gray-200 pt-6">
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">
+                                    Accredited &amp; Partnered With
+                                </p>
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    {partners1.map((p) => (
+                                        <div
+                                            key={p.name}
+                                            className="group flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white px-2 py-3 shadow-sm transition hover:border-teal-200 hover:shadow-md"
+                                        >
+                                            {p.image ? (
+                                                <img
+                                                    src={p.image}
+                                                    alt={p.name}
+                                                    className="w-full object-contain grayscale transition group-hover:grayscale-0"
+                                                    style={{ height: '200px' }}
+                                                />
+                                            ) : (
+                                                <div className="flex w-full items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-gray-300" style={{ height: '200px' }}>
+                                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V9.75" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <span className="text-[10px] font-bold tracking-wide text-gray-600 group-hover:text-teal-600">
+                                                {p.name}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                 </div>
             </section>
 
@@ -886,7 +1004,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                 </section>
             )}
 
-            {/* ── FLIGHT PARTNERS ────────────────────────────────────────── */}
+            {/* ── FLIGHT PARTNERS SLIDER ─────────────────────────────────── */}
             <section className="bg-gray-50 py-16">
                 <div className="mx-auto max-w-5xl px-4 md:px-6">
                     <div className="mb-10 text-center">
@@ -897,35 +1015,72 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                         <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-500" />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-4">
-                        {partners.map((p) => (
-                            <div
-                                key={p.name}
-                                className="flex flex-col items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-8 shadow-sm transition hover:shadow-md"
-                            >
-                                {/* Logo area */}
-                                {p.image ? (
-                                    <img
-                                        src={p.image}
-                                        alt={p.name}
-                                        className="h-24 w-auto object-contain"
-                                    />
-                                ) : (
-                                    /* Placeholder until real logo is supplied */
-                                    <div className="flex h-24 w-36 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 text-gray-300">
-                                        <svg className="mb-1 h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V9.75" />
-                                        </svg>
-                                        <span className="text-xs">Upload logo</span>
-                                    </div>
-                                )}
+                    {/* Slider */}
+                    <div className="relative px-8 md:px-10">
+                        {/* Left arrow */}
+                        <button
+                            onClick={partnerPrev}
+                            className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-gray-100 text-gray-600 transition hover:bg-teal-600 hover:text-white"
+                            aria-label="Previous partner"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                        </button>
 
-                                {/* Name + full name */}
-                                <div className="text-center">
-                                    <p className="text-xl font-extrabold tracking-wide text-gray-900">{p.name}</p>
-                                    <p className="mt-1 text-xs leading-snug text-gray-500">{p.fullName}</p>
-                                </div>
+                        {/* Viewport — clips overflowing cards */}
+                        <div className="overflow-hidden">
+                            <div
+                                className="flex"
+                                style={{
+                                    transform: `translateX(-${partnerSlide * (100 / VISIBLE_PARTNERS)}%)`,
+                                    transition: partnerTransition ? 'transform 500ms ease-in-out' : 'none',
+                                }}
+                            >
+                                {partnerExtended.map((p, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex-shrink-0 px-3"
+                                        style={{ width: `${100 / VISIBLE_PARTNERS}%` }}
+                                    >
+                                        <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-8 shadow-sm transition-shadow hover:shadow-md h-full">
+                                            {p.image ? (
+                                                <img src={p.image} alt={p.name} className="h-24 w-auto object-contain" />
+                                            ) : (
+                                                <div className="flex h-24 w-36 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 text-gray-300">
+                                                    <svg className="mb-1 h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V9.75" />
+                                                    </svg>
+                                                    <span className="text-xs">Upload logo</span>
+                                                </div>
+                                            )}
+                                            <div className="text-center">
+                                                <p className="text-xl font-extrabold tracking-wide text-gray-900">{p.name}</p>
+                                                <p className="mt-1 text-xs leading-snug text-gray-500">{p.fullName}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
+                        </div>
+
+                        {/* Right arrow */}
+                        <button
+                            onClick={partnerNext}
+                            className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-gray-100 text-gray-600 transition hover:bg-teal-600 hover:text-white"
+                            aria-label="Next partner"
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {/* Dot indicators */}
+                    <div className="mt-6 flex justify-center gap-2">
+                        {partners.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => { setPartnerTransition(true); setPartnerSlide(partners.length + i); resetPartnerTimer(); }}
+                                className={`h-2 rounded-full transition-all ${i === partnerDotIndex ? 'w-6 bg-teal-500' : 'w-2 bg-gray-300 hover:bg-gray-400'}`}
+                                aria-label={`Go to partner ${i + 1}`}
+                            />
                         ))}
                     </div>
                 </div>
@@ -1032,7 +1187,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     </a>
                                 ))}
                             </div>
-                            <div className="rounded-xl border border-gray-700 p-4">
+                            {/* <div className="rounded-xl border border-gray-700 p-4">
                                 <p className="mb-2 text-sm font-medium text-white">Newsletter</p>
                                 <p className="mb-3 text-xs">Get exclusive travel deals in your inbox.</p>
                                 <div className="flex gap-2">
@@ -1045,7 +1200,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                         Go
                                     </button>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
