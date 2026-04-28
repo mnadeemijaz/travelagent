@@ -628,9 +628,9 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                     <div className="absolute bottom-6 left-0 z-20 w-full px-4">
                         <div className="mx-auto grid max-w-2xl grid-cols-3 gap-4 rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur-sm">
                             {[
-                                { value: '10,000+', label: 'Happy Travelers' },
+                                { value: '100,000+', label: 'Happy Travelers' },
                                 { value: '50+', label: 'Destinations' },
-                                { value: '15 Years', label: 'Experience' },
+                                { value: '20+ Years', label: 'Experience' },
                             ].map((s) => (
                                 <div key={s.label} className="text-center">
                                     <p className="text-xl font-bold text-teal-400 sm:text-2xl">{s.value}</p>
