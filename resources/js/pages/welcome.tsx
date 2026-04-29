@@ -758,11 +758,13 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                         <img
                                             src={slide.image}
                                             alt={slide.alt}
-                                            className="absolute inset-0 h-full w-full object-cover cursor-zoom-in"
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                        />
+                                        {/* Subtle dark overlay — clickable to open lightbox */}
+                                        <div
+                                            className="absolute inset-0 bg-black/20 cursor-zoom-in"
                                             onClick={() => { setLightboxAbout(slide); setAboutZoomScale(1); }}
                                         />
-                                        {/* Subtle dark overlay */}
-                                        <div className="absolute inset-0 bg-black/20" />
                                     </div>
                                 ))}
 
