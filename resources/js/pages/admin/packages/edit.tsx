@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -26,6 +27,7 @@ export default function PackagesEdit({ package: pkg }: { package: PkgProp }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <SettingsLayout wide>
             <Head title="Edit Package" />
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
@@ -61,6 +63,7 @@ export default function PackagesEdit({ package: pkg }: { package: PkgProp }) {
                     </Button>
                 </form>
             </div>
+            </SettingsLayout>
         </AppLayout>
     );
 }

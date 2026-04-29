@@ -13,13 +13,13 @@ const accountNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
     { title: 'Destinations',  url: '/admin/destinations',  icon: null },
-    { title: 'Tour Packages', url: '/admin/packages',      icon: null },
+    { title: 'Tour Packages', url: '/admin/packages',  icon: null },
     { title: 'Gallery',       url: '/admin/experiences',   icon: null },
     { title: 'Hotel Image',   url: '/admin/hotel-images',  icon: null },
     { title: 'Bank Details',  url: '/admin/bank-details',  icon: null },
 ];
 
-export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+export default function SettingsLayout({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
     const currentPath = window.location.pathname;
     const { auth } = usePage<SharedData>().props;
     const isAgent = auth.roles?.includes('agent');
@@ -77,8 +77,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
 
                 <Separator className="my-6 md:hidden" />
 
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">{children}</section>
+                <div className={cn('flex-1', !wide && 'md:max-w-2xl')}>
+                    <section className={cn(!wide && 'max-w-xl', 'space-y-12')}>{children}</section>
                 </div>
             </div>
         </div>

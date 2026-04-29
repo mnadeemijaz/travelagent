@@ -31,6 +31,10 @@ class ProfileController extends Controller
                 'tagline'      => $config->tagline ?? '',
                 'phone'        => $config->phone ?? '',
                 'email'        => $config->email ?? '',
+                'adult_rate'   => (float) ($config->adult_rate ?? 0),
+                'child_rate'   => (float) ($config->child_rate ?? 0),
+                'infant_rate'  => (float) ($config->infant_rate ?? 0),
+                'sr_rate'      => (float) ($config->sr_rate ?? 1),
             ],
         ]);
     }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AgentHotel extends Model
 {
-    protected $fillable = ['agent_id', 'hotel_id', 'price'];
+    protected $fillable = ['agent_id', 'hotel_id', 'room_type', 'price'];
 
     protected function casts(): array
     {

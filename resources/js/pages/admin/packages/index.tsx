@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 
@@ -19,6 +20,7 @@ export default function PackagesIndex({ packages, flash }: { packages: Pkg[]; fl
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <SettingsLayout wide>
             <Head title="Tour Packages" />
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
@@ -75,6 +77,7 @@ export default function PackagesIndex({ packages, flash }: { packages: Pkg[]; fl
                     </table>
                 </div>
             </div>
+            </SettingsLayout>
         </AppLayout>
     );
 }

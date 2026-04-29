@@ -17,6 +17,10 @@ class ConfigurationController extends Controller
             'tagline'      => ['nullable', 'string', 'max:200'],
             'phone'        => ['nullable', 'string', 'max:50'],
             'email'        => ['nullable', 'email', 'max:150'],
+            'adult_rate'   => ['nullable', 'numeric', 'min:0'],
+            'child_rate'   => ['nullable', 'numeric', 'min:0'],
+            'infant_rate'  => ['nullable', 'numeric', 'min:0'],
+            'sr_rate'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $config = CompanyConfiguration::instance();

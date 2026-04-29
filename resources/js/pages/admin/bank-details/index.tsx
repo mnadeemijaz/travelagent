@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Landmark } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function BankDetailsIndex({ bankDetails, flash }: { bankDetails: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <SettingsLayout wide>
             <Head title="Bank Details" />
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
@@ -98,6 +100,7 @@ export default function BankDetailsIndex({ bankDetails, flash }: { bankDetails: 
                     </table>
                 </div>
             </div>
+            </SettingsLayout>
         </AppLayout>
     );
 }

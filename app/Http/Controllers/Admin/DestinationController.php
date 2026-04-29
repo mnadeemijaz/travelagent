@@ -37,7 +37,7 @@ class DestinationController extends Controller
         $validated = $request->validate([
             'name'    => ['required', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
-            'price'   => ['required', 'string', 'max:50'],
+            'price'   => [  'max:50'],
             'image'   => ['required', 'image', 'max:2048'],
             'active'  => ['boolean'],
         ]);
@@ -79,7 +79,7 @@ class DestinationController extends Controller
         $validated = $request->validate([
             'name'    => ['required', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
-            'price'   => ['required', 'string', 'max:50'],
+            'price'   => [ 'max:50'],
             'image'   => ['nullable', 'image', 'max:2048'],
             'active'  => ['boolean'],
         ]);

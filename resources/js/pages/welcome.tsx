@@ -92,6 +92,17 @@ interface DbExperience  { id: number; name: string; image_url: string; }
 interface DbHotelImage { id: number; name: string; city_name: string; price: number; image_url: string; }
 interface CompanyConfig { company_name: string; address: string | null; tagline: string | null; phone: string | null; email: string | null; }
 
+// About section slider images
+const aboutSlides = [
+    { image: '/storage/front/about.jpg',   alt: 'AL Abrar Travels Office' },
+    { image: '/storage/front/about-2.jpg', alt: 'Umrah Services' },
+    { image: '/storage/front/about-3.jpg', alt: 'Tour Packages' },
+    { image: '/storage/front/about-4.jpg', alt: 'Hotel Bookings' },
+    { image: '/storage/front/about-5.jpg', alt: 'Visa Services' },
+    { image: '/storage/front/about-6.jpg', alt: 'Visa Services' },
+    { image: '/storage/front/about-7.jpg', alt: 'Visa Services' },
+];
+
 // Flight / travel partners — set `image` to your logo URL when ready
 const partners1 = [
     { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
@@ -101,10 +112,23 @@ const partners1 = [
 ];
 const partners = [
     { name: 'Air Arabia', fullName: 'Air Arabia', image: "storage/front/airarabia.png" as string | null },
-    { name: 'Air Sial',  fullName: 'Air Sial',               image: "storage/front/airSial.png" as string | null },
+    { name: 'Air Sial',  fullName: 'Air Sial',               image: "storage/front/airsial.png" as string | null },
     { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
     { name: 'Air Blue',  fullName: 'Air Blue',       image: "storage/front/airblue.png" as string | null },
     { name: 'Fly Jinah',  fullName: 'Fly Jinah',       image: "storage/front/flyjinah.png" as string | null },
+    { name: 'Air Araibia',  fullName: 'Air Araibia',       image: "storage/front/airarabia.png" as string | null },
+    { name: 'Air Farance',  fullName: 'Air Farance',       image: "storage/front/airfarance.png" as string | null },
+    { name: 'Emirates',  fullName: 'Emirates Air Line',       image: "storage/front/emirates.png" as string | null },
+    { name: 'Ethihad',  fullName: 'Ethihad Air Line',       image: "storage/front/ethihad.png" as string | null },
+    { name: 'Ethiopian',  fullName: 'Ethiopian Air Line',       image: "storage/front/ethiopian.png" as string | null },
+    { name: 'K2 Airways',  fullName: 'K2 Airways',       image: "storage/front/k2airways.png" as string | null },
+    { name: 'Malindo Air',  fullName: 'Malindo Air',       image: "storage/front/malindoair.png" as string | null },
+    { name: 'Pegasus',  fullName: 'Pegasus Air',       image: "storage/front/pegasus.png" as string | null },
+    { name: 'Qatar',  fullName: 'Qatar Airways',       image: "storage/front/qatar.png" as string | null },
+    { name: 'Serence Air',  fullName: 'Serence Air',       image: "storage/front/serenceair.png" as string | null },
+    { name: 'Srilankan',  fullName: 'Srilankan Air Line',       image: "storage/front/srilankan.png" as string | null },
+    { name: 'Turkish',  fullName: 'Turkish Air Line',       image: "storage/front/turkish.png" as string | null },
+    { name: 'Uzbekistan',  fullName: 'Uzbekistan Air Line',       image: "storage/front/uzbekistan.png" as string | null },
 ];
 
 // gallery is now DB-driven (passed as prop)
@@ -288,6 +312,23 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     const [modalOpen, setModalOpen] = useState(false);
     const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
 
+    // About section image slider
+    const [aboutSlide, setAboutSlide] = useState(0);
+    const aboutTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const resetAboutTimer = useCallback(() => {
+        if (aboutTimer.current) clearInterval(aboutTimer.current);
+        aboutTimer.current = setInterval(() => setAboutSlide((s) => (s + 1) % aboutSlides.length), 4000);
+    }, []);
+
+    useEffect(() => {
+        resetAboutTimer();
+        return () => { if (aboutTimer.current) clearInterval(aboutTimer.current); };
+    }, [resetAboutTimer]);
+
+    function aboutPrev() { setAboutSlide((s) => (s - 1 + aboutSlides.length) % aboutSlides.length); resetAboutTimer(); }
+    function aboutNext() { setAboutSlide((s) => (s + 1) % aboutSlides.length); resetAboutTimer(); }
+
     // Hero slider
     const [heroSlide, setHeroSlide] = useState(0);
     const heroTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -309,15 +350,30 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     const [lightboxPkg, setLightboxPkg] = useState<DbPackage | null>(null);
     const [zoomScale, setZoomScale] = useState(1);
 
+    // About image lightbox
+    const [lightboxAbout, setLightboxAbout] = useState<{ image: string; alt: string } | null>(null);
+    const [aboutZoomScale, setAboutZoomScale] = useState(1);
+
     // Hotel city tabs
     const hotelCities = ['All', ...Array.from(new Set(hotelImages.map((h) => h.city_name)))];
     const [activeCity, setActiveCity] = useState('All');
     const visibleHotels = activeCity === 'All' ? hotelImages : hotelImages.filter((h) => h.city_name === activeCity);
 
     // Partners slider — infinite loop via cloned array
-    // We show VISIBLE_PARTNERS cards at a time; slide steps by 1.
-    // Array is tripled so we can seamlessly loop from index N back to 0.
-    const VISIBLE_PARTNERS = 3;
+    // visibleCount is responsive: 1 on mobile, 2 on tablet, 3 on desktop.
+    const [visibleCount, setVisibleCount] = useState(3);
+    const partnerViewportRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function updateVisible() {
+            const w = partnerViewportRef.current?.offsetWidth ?? window.innerWidth;
+            setVisibleCount(w < 480 ? 1 : w < 768 ? 2 : 3);
+        }
+        updateVisible();
+        window.addEventListener('resize', updateVisible);
+        return () => window.removeEventListener('resize', updateVisible);
+    }, []);
+
     const partnerExtended = [...partners, ...partners, ...partners]; // triple
     const [partnerSlide, setPartnerSlide] = useState(partners.length); // start in the middle copy
     const [partnerTransition, setPartnerTransition] = useState(true);
@@ -367,6 +423,10 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
     function closeLightbox() { setLightboxPkg(null); setZoomScale(1); }
     function zoomIn()  { setZoomScale((z) => Math.min(z + 0.25, 3)); }
     function zoomOut() { setZoomScale((z) => Math.max(z - 0.25, 0.5)); }
+
+    function closeAboutLightbox() { setLightboxAbout(null); setAboutZoomScale(1); }
+    function aboutZoomIn()  { setAboutZoomScale((z) => Math.min(z + 0.25, 3)); }
+    function aboutZoomOut() { setAboutZoomScale((z) => Math.max(z - 0.25, 0.5)); }
 
     function openLogin() {
         setAuthTab('login');
@@ -681,27 +741,70 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
             <section id="about" className="bg-gray-50 py-20">
                 <div className="mx-auto max-w-7xl px-4 md:px-6">
                     <div className="grid items-center gap-10 md:grid-cols-2">
-                        {/* Visual */}
+                        {/* Visual — image slider */}
                         <div className="relative">
-                            <div
-                                className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-400 to-blue-600 p-1 shadow-xl relative"
-                                style={{
-                                    backgroundImage: "url('/storage/front/about.jpg')",
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                }}
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-teal-400  opacity-0 pointer-events-none" />
-                                <div className="flex h-72 items-center justify-center rounded-3xl from-teal-500/90 to-blue-700/90 md:h-96">
-                                    <div className="text-center text-white">
-                                        <div className="mb-4 text-7xl">✈️</div>
-                                        <p className="text-lg font-semibold">Explore the World</p>
-                                        <p className="text-sm opacity-80">with AL Abrar Travels</p>
+                            {/* Slide track */}
+                            <div className="relative h-72 overflow-hidden rounded-3xl shadow-xl md:h-96">
+                                {aboutSlides.map((slide, i) => (
+                                    <div
+                                        key={i}
+                                        className={`absolute inset-0 transition-opacity duration-700 ${i === aboutSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                    >
+                                        {/* Fallback gradient behind image */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-blue-700 flex flex-col items-center justify-center text-white">
+                                            <div className="mb-3 text-6xl">✈️</div>
+                                            <p className="text-base font-semibold">{slide.alt}</p>
+                                        </div>
+                                        <img
+                                            src={slide.image}
+                                            alt={slide.alt}
+                                            className="absolute inset-0 h-full w-full object-cover cursor-zoom-in"
+                                            onClick={() => { setLightboxAbout(slide); setAboutZoomScale(1); }}
+                                        />
+                                        {/* Subtle dark overlay */}
+                                        <div className="absolute inset-0 bg-black/20" />
                                     </div>
+                                ))}
+
+                                {/* Prev arrow */}
+                                <button
+                                    onClick={aboutPrev}
+                                    className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/70"
+                                    aria-label="Previous image"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+
+                                {/* Next arrow */}
+                                <button
+                                    onClick={aboutNext}
+                                    className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/70"
+                                    aria-label="Next image"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+
+                                {/* Dot indicators */}
+                                <div className="absolute bottom-3 left-0 z-10 flex w-full justify-center gap-1.5">
+                                    {aboutSlides.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => { setAboutSlide(i); resetAboutTimer(); }}
+                                            className={`h-1.5 rounded-full transition-all ${i === aboutSlide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'}`}
+                                            aria-label={`Go to image ${i + 1}`}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Slide counter */}
+                                <div className="absolute top-3 right-3 z-10 rounded-full bg-black/40 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                                    {aboutSlide + 1} / {aboutSlides.length}
                                 </div>
                             </div>
+
+                            {/* Years badge */}
                             <div className="absolute -bottom-4 -right-4 rounded-2xl bg-teal-600 px-5 py-3 text-white shadow-lg">
-                                <p className="text-2xl font-bold">15+</p>
+                                <p className="text-2xl font-bold">20+</p>
                                 <p className="text-xs">Years of Excellence</p>
                             </div>
                         </div>
@@ -726,10 +829,11 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             </p>
                             <ul className="mb-8 space-y-2">
                                 {[
-                                    'IATA Certified Travel Agency',
-                                    'Umrah & Hajj Licensed Operator',
-                                    'Visa Success Rate 98%',
-                                    '24/7 Customer Support',
+                                    'IATA ACCREDITED AGENT',
+                                    'PSA HOLDER',
+                                    'PERSONLY UMRAH AGGREMENT',
+                                    'Government approved AGENCY',
+                                    '24/7 CUSTOMER SUPPORT'
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-2 text-sm text-gray-700">
                                         <span className="h-2 w-2 rounded-full bg-teal-500" />
@@ -762,7 +866,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                                 <img
                                                     src={p.image}
                                                     alt={p.name}
-                                                    className="w-full object-contain grayscale transition group-hover:grayscale-0"
+                                                    className="w-full object-contain  transition group-hover:grayscale-0"
                                                     style={{ height: '200px' }}
                                                 />
                                             ) : (
@@ -810,12 +914,15 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-4">
                                         <p className="text-lg font-bold text-white">{d.name}</p>
                                         {d.country && <p className="text-sm text-gray-300">{d.country}</p>}
+                                        
+                                        {d.price && (
                                         <div className="mt-2 flex items-center justify-between">
                                             <span className="text-xs text-gray-300">Starting from</span>
                                             <span className="rounded-full bg-teal-500 px-3 py-1 text-xs font-bold text-white">
                                                 {d.price}
                                             </span>
                                         </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1027,11 +1134,11 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                         </button>
 
                         {/* Viewport — clips overflowing cards */}
-                        <div className="overflow-hidden">
+                        <div className="overflow-hidden" ref={partnerViewportRef}>
                             <div
                                 className="flex"
                                 style={{
-                                    transform: `translateX(-${partnerSlide * (100 / VISIBLE_PARTNERS)}%)`,
+                                    transform: `translateX(-${partnerSlide * (100 / visibleCount)}%)`,
                                     transition: partnerTransition ? 'transform 500ms ease-in-out' : 'none',
                                 }}
                             >
@@ -1039,7 +1146,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     <div
                                         key={idx}
                                         className="flex-shrink-0 px-3"
-                                        style={{ width: `${100 / VISIBLE_PARTNERS}%` }}
+                                        style={{ width: `${100 / visibleCount}%` }}
                                     >
                                         <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-8 shadow-sm transition-shadow hover:shadow-md h-full">
                                             {p.image ? (
@@ -1095,6 +1202,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                     <p className="mb-7 text-teal-100">
                         Register today and get exclusive PKR rates on all destinations.
                     </p>
+                    {!auth.user && (
                     <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                         <button
                             onClick={openRegister}
@@ -1109,6 +1217,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             Already a Member? Login
                         </button>
                     </div>
+                    )}
                 </div>
             </section>
 
@@ -1172,16 +1281,17 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             <h4 className="mb-4 font-semibold text-white">Follow Us</h4>
                             <div className="mb-6 flex gap-3">
                                 {[
-                                    { icon: Facebook, label: 'Facebook' },
-                                    { icon: Twitter, label: 'Twitter' },
-                                    { icon: Instagram, label: 'Instagram' },
-                                    { icon: Youtube, label: 'YouTube' },
-                                ].map(({ icon: Icon, label }) => (
+                                    { icon: Facebook, label: 'Facebook',href:"https://www.facebook.com/share/1CuBMcJ15D/" },
+                                    // { icon: Twitter, label: 'Twitter',href:"https://www.twitter.com" },
+                                    { icon: Instagram, label: 'Instagram',href:"https://www.instagram.com/alabrargroup_of_travels?utm_source=qr&igsh=MXRwem5ybW01cmRjbg==" },
+                                    // { icon: Youtube, label: 'YouTube',href:"https://www.youtube.com" },
+                                ].map(({ icon: Icon, label, href }) => (
                                     <a
                                         key={label}
-                                        href="#"
+                                        href={href}
                                         aria-label={label}
                                         className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800 text-gray-400 transition-colors hover:bg-teal-600 hover:text-white"
+                                        target='_blank'
                                     >
                                         <Icon className="h-4 w-4" />
                                     </a>
@@ -1216,6 +1326,61 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                     </div>
                 </div>
             </footer>
+
+            {/* ── ABOUT IMAGE LIGHTBOX ──────────────────────────────────── */}
+            {lightboxAbout && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+                    onClick={closeAboutLightbox}
+                >
+                    <div
+                        className="relative flex max-h-[90vh] max-w-[90vw] flex-col items-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Top bar */}
+                        <div className="mb-3 flex w-full items-center justify-between gap-4 px-1">
+                            <p className="truncate text-sm font-semibold text-white">{lightboxAbout.alt}</p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={aboutZoomOut}
+                                    disabled={aboutZoomScale <= 0.5}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:opacity-40"
+                                    title="Zoom out"
+                                >
+                                    <ZoomOut className="h-4 w-4" />
+                                </button>
+                                <span className="w-12 text-center text-xs text-white/70">{Math.round(aboutZoomScale * 100)}%</span>
+                                <button
+                                    onClick={aboutZoomIn}
+                                    disabled={aboutZoomScale >= 3}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:opacity-40"
+                                    title="Zoom in"
+                                >
+                                    <ZoomIn className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={closeAboutLightbox}
+                                    className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-red-500"
+                                    title="Close"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Scrollable image container */}
+                        <div className="overflow-auto rounded-xl" style={{ maxHeight: 'calc(90vh - 80px)', maxWidth: '90vw' }}>
+                            <img
+                                src={lightboxAbout.image}
+                                alt={lightboxAbout.alt}
+                                style={{ transform: `scale(${aboutZoomScale})`, transformOrigin: 'top left', transition: 'transform 0.2s ease' }}
+                                className="block max-w-none rounded-xl"
+                                draggable={false}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── PACKAGE IMAGE LIGHTBOX ─────────────────────────────────── */}
             {lightboxPkg && (

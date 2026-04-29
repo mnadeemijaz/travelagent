@@ -13,6 +13,10 @@ export interface CompanyConfig {
     tagline: string;
     phone: string;
     email: string;
+    adult_rate: number;
+    child_rate: number;
+    infant_rate: number;
+    sr_rate: number;
 }
 
 interface Props {
@@ -21,12 +25,16 @@ interface Props {
 }
 
 export default function CompanyConfigurationForm({ configuration, configSaved = false }: Props) {
-    const { data, setData, post, errors, processing, recentlySuccessful } = useForm<CompanyConfig>({
+    const { data, setData, post, errors, processing, recentlySuccessful } = useForm({
         company_name: configuration.company_name ?? '',
         address:      configuration.address ?? '',
         tagline:      configuration.tagline ?? '',
         phone:        configuration.phone ?? '',
         email:        configuration.email ?? '',
+        adult_rate:   String(configuration.adult_rate  ?? 0),
+        child_rate:   String(configuration.child_rate  ?? 0),
+        infant_rate:  String(configuration.infant_rate ?? 0),
+        sr_rate:      String(configuration.sr_rate     ?? 1),
     });
 
     const submit: FormEventHandler = (e) => {
@@ -99,6 +107,57 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
                         placeholder="info@company.com"
                     />
                     <InputError message={errors.email} />
+                </div>
+
+                {/* Default Voucher Rates */}
+                <div className="border-t pt-4">
+                    <p className="mb-3 text-sm font-medium text-muted-foreground">Default Voucher Rates</p>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="cfg-adult-rate">Adult Rate</Label>
+                            <Input
+                                id="cfg-adult-rate"
+                                type="number" min={0} step="0.01"
+                                value={data.adult_rate}
+                                onChange={(e) => setData('adult_rate', e.target.value)}
+                                placeholder="0.00"
+                            />
+                            <InputError message={errors.adult_rate} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="cfg-child-rate">Child Rate</Label>
+                            <Input
+                                id="cfg-child-rate"
+                                type="number" min={0} step="0.01"
+                                value={data.child_rate}
+                                onChange={(e) => setData('child_rate', e.target.value)}
+                                placeholder="0.00"
+                            />
+                            <InputError message={errors.child_rate} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="cfg-infant-rate">Infant Rate</Label>
+                            <Input
+                                id="cfg-infant-rate"
+                                type="number" min={0} step="0.01"
+                                value={data.infant_rate}
+                                onChange={(e) => setData('infant_rate', e.target.value)}
+                                placeholder="0.00"
+                            />
+                            <InputError message={errors.infant_rate} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="cfg-sr-rate">SR Rate</Label>
+                            <Input
+                                id="cfg-sr-rate"
+                                type="number" min={0} step="0.0001"
+                                value={data.sr_rate}
+                                onChange={(e) => setData('sr_rate', e.target.value)}
+                                placeholder="1.00"
+                            />
+                            <InputError message={errors.sr_rate} />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">

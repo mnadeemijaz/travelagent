@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export default function BankDetailCreate() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <SettingsLayout wide>
             <Head title="Add Bank Detail" />
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
@@ -43,6 +45,7 @@ export default function BankDetailCreate() {
                     setData={(key, value) => setData(key as any, value as any)}
                 />
             </div>
+            </SettingsLayout>
         </AppLayout>
     );
 }

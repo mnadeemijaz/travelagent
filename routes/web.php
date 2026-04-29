@@ -83,6 +83,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('vouchers/approve', [VoucherController::class, 'approve'])->name('vouchers.approve');
         Route::post('vouchers/reject',  [VoucherController::class, 'reject'])->name('vouchers.reject');
         Route::get ('vouchers/eligible-clients', [VoucherController::class, 'eligibleClients'])->name('vouchers.eligible-clients');
+        Route::get ('vouchers/{voucher}/view',        [VoucherController::class, 'voucherView'])->name('vouchers.view');
+        Route::get ('vouchers/{voucher}/invoice',     [VoucherController::class, 'voucherInvoice'])->name('vouchers.invoice');
+        Route::get ('vouchers/{voucher}/pdf',         [VoucherController::class, 'voucherPdf'])->name('vouchers.pdf');
+        Route::get ('vouchers/{voucher}/invoice-pdf', [VoucherController::class, 'invoicePdf'])->name('vouchers.invoice-pdf');
 
         // Clients (agents can add/edit their own clients and check passport)
         Route::resource('clients', ClientController::class)->except(['show']);

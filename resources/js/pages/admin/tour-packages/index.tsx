@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 
@@ -15,6 +16,7 @@ export default function TourPackagesIndex({ tourPackages, flash }: { tourPackage
     }
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <SettingsLayout wide>
             <Head title="Tour Packages" />
             <div className="flex flex-col gap-5 p-6">
                 <div className="flex items-center justify-between">
@@ -58,6 +60,7 @@ export default function TourPackagesIndex({ tourPackages, flash }: { tourPackage
                     </div>
                 )}
             </div>
+            </SettingsLayout>
         </AppLayout>
     );
 }

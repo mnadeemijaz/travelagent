@@ -13,7 +13,9 @@ use Inertia\Response;
 
 class AgentHotelController extends Controller
 {
-    // ── Index: list all agents with their assigned hotels ─────────────────────
+    const ROOM_TYPES = ['sharing', 'single_bed', 'double_bed', 'triple_bed', 'quad_bed', 'five_bed', 'six_bed'];
+
+    // ── Index: list all agents with their assigned hotels + room types ──────────
 
     public function index(): Response
     {
@@ -26,11 +28,15 @@ class AgentHotelController extends Controller
                 'hotels' => AgentHotel::where('agent_id', $agent->id)
                     ->with('hotel:id,name,city_name')
                     ->get()
+                    ->filter(fn($ah) => $ah->hotel !== null)
+                    ->sortBy(fn($ah) => [$ah->hotel->city_name, $ah->hotel->name, $ah->room_type])
+                    ->values()
                     ->map(fn($ah) => [
                         'hotel_id'   => $ah->hotel_id,
-                        'hotel_name' => $ah->hotel->name ?? '—',
-                        'city_name'  => $ah->hotel->city_name ?? '—',
-                        'price'      => $ah->price,
+                        'hotel_name' => $ah->hotel->name,
+                        'city_name'  => $ah->hotel->city_name,
+                        'room_type'  => $ah->room_type,
+                        'price'      => (float) $ah->price,
                     ]),
             ]);
 
@@ -39,51 +45,64 @@ class AgentHotelController extends Controller
         ]);
     }
 
-    // ── Edit: form to assign hotels + prices for one agent ────────────────────
+    // ── Edit: form to assign hotels + room-type prices for one agent ───────────
 
     public function edit(int $agentId): Response
     {
         $agent = User::whereHas('roles', fn($q) => $q->where('name', 'agent'))
             ->findOrFail($agentId, ['id', 'name']);
 
-        $hotels = Hotel::where('isDeleted', 0)->orderBy('name')->get(['id', 'name', 'city_name']);
+        $hotels = Hotel::where('isDeleted', 0)
+            ->orderBy('city_name')
+            ->orderBy('name')
+            ->get(['id', 'name', 'city_name']);
 
+        // assigned: flat list { hotel_id, room_type, price }
         $assigned = AgentHotel::where('agent_id', $agentId)
             ->get()
-            ->keyBy('hotel_id')
-            ->map(fn($ah) => ['hotel_id' => $ah->hotel_id, 'price' => $ah->price]);
+            ->map(fn($ah) => [
+                'hotel_id'  => $ah->hotel_id,
+                'room_type' => $ah->room_type,
+                'price'     => (float) $ah->price,
+            ]);
 
         return Inertia::render('admin/agent-hotels/edit', [
-            'agent'    => ['id' => $agent->id, 'name' => $agent->name],
-            'hotels'   => $hotels,
-            'assigned' => $assigned->values(),
+            'agent'      => ['id' => $agent->id, 'name' => $agent->name],
+            'hotels'     => $hotels,
+            'assigned'   => $assigned,
+            'roomTypes'  => self::ROOM_TYPES,
         ]);
     }
 
-    // ── Update: sync hotels + prices for one agent ────────────────────────────
+    // ── Update: sync hotel+room_type+price rows for one agent ─────────────────
 
     public function update(Request $request, int $agentId): RedirectResponse
     {
-        // Ensure agent exists
         User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->findOrFail($agentId);
 
         $request->validate([
-            'hotels'           => ['nullable', 'array'],
-            'hotels.*.hotel_id' => ['required', 'integer', 'exists:hotels,id'],
-            'hotels.*.price'    => ['required', 'numeric', 'min:0'],
+            'hotels'                => ['nullable', 'array'],
+            'hotels.*.hotel_id'     => ['required', 'integer', 'exists:hotels,id'],
+            'hotels.*.room_type'    => ['required', 'string', 'in:' . implode(',', self::ROOM_TYPES)],
+            'hotels.*.price'        => ['required', 'numeric', 'min:0'],
         ]);
 
         $rows = collect($request->input('hotels', []));
 
-        // Delete removed assignments
+        // Delete removed (hotel_id + room_type) combos
         AgentHotel::where('agent_id', $agentId)
-            ->whereNotIn('hotel_id', $rows->pluck('hotel_id')->toArray())
-            ->delete();
+            ->get()
+            ->each(function ($ah) use ($rows) {
+                $still = $rows->first(fn($r) =>
+                    $r['hotel_id'] == $ah->hotel_id && $r['room_type'] === $ah->room_type
+                );
+                if (!$still) $ah->delete();
+            });
 
         // Upsert each row
         foreach ($rows as $row) {
             AgentHotel::updateOrCreate(
-                ['agent_id' => $agentId, 'hotel_id' => $row['hotel_id']],
+                ['agent_id' => $agentId, 'hotel_id' => $row['hotel_id'], 'room_type' => $row['room_type']],
                 ['price' => $row['price']]
             );
         }
