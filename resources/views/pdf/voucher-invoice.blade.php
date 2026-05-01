@@ -41,8 +41,10 @@
             <div style="font-size:10px;color:#555">{{ $company['address'] }}</div>
             <div style="font-size:10px;color:#555">{{ $company['phone'] }} | {{ $company['email'] }}</div>
         </td>
-        <td style="width:20%;text-align:right">
-            <div style="font-size:16px;font-weight:bold;color:#374151">INVOICE</div>
+        <td style="width:20%;text-align:right;vertical-align:top">
+            <img src="{{ $qrCodeBase64 }}" alt="QR" style="width:72px;height:72px;display:block;margin-left:auto">
+            <div style="font-size:9px;color:#888;text-align:right;margin-top:2px">Scan to verify</div>
+            <div style="font-size:16px;font-weight:bold;color:#374151;margin-top:2px">INVOICE</div>
             <div style="font-size:10px;color:#555">Agent: {{ $voucher['agent_name'] }}</div>
         </td>
     </tr>
@@ -82,7 +84,7 @@
 </table>
 
 {{-- KSA Arrival --}}
-<div class="section-heading">KSA Arrival Information</div>
+<div class="section-heading">Departure Information</div>
 <table>
     <tr>
         <th>Sector</th><th>Flight No</th><th>Dep Date</th>
@@ -99,8 +101,8 @@
     </tr>
 </table>
 
-{{-- Departure --}}
-<div class="section-heading">Departure Information</div>
+{{-- Return --}}
+<div class="section-heading">Return Information</div>
 <table>
     <tr>
         <th>Sector</th><th>Flight No</th><th>Dep Date</th><th>Dep Time</th><th>PNR</th>
@@ -255,6 +257,35 @@
 {{-- Bottom image --}}
 @if(file_exists($instructionsPath))
 <img src="{{ $instructionsPath }}" alt="AL Abrar" class="bottom-img">
+@endif
+
+{{-- Emergency Contacts --}}
+@if($company['makkah_contact1_name'] || $company['makkah_contact2_name'] || $company['madina_contact1_name'] || $company['madina_contact2_name'])
+<div class="section-heading" style="margin-top:8px">Emergency Contacts</div>
+<table style="margin-top:2px">
+    <tr>
+        <th style="width:50%">Makkah</th>
+        <th style="width:50%">Madina</th>
+    </tr>
+    <tr>
+        <td>
+            @if($company['makkah_contact1_name'])
+            <div>{{ $company['makkah_contact1_name'] }}: <strong>{{ $company['makkah_contact1_phone'] }}</strong></div>
+            @endif
+            @if($company['makkah_contact2_name'])
+            <div>{{ $company['makkah_contact2_name'] }}: <strong>{{ $company['makkah_contact2_phone'] }}</strong></div>
+            @endif
+        </td>
+        <td>
+            @if($company['madina_contact1_name'])
+            <div>{{ $company['madina_contact1_name'] }}: <strong>{{ $company['madina_contact1_phone'] }}</strong></div>
+            @endif
+            @if($company['madina_contact2_name'])
+            <div>{{ $company['madina_contact2_name'] }}: <strong>{{ $company['madina_contact2_phone'] }}</strong></div>
+            @endif
+        </td>
+    </tr>
+</table>
 @endif
 
 </body>

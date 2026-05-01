@@ -17,6 +17,14 @@ export interface CompanyConfig {
     child_rate: number;
     infant_rate: number;
     sr_rate: number;
+    makkah_contact1_name: string;
+    makkah_contact1_phone: string;
+    makkah_contact2_name: string;
+    makkah_contact2_phone: string;
+    madina_contact1_name: string;
+    madina_contact1_phone: string;
+    madina_contact2_name: string;
+    madina_contact2_phone: string;
 }
 
 interface Props {
@@ -26,15 +34,23 @@ interface Props {
 
 export default function CompanyConfigurationForm({ configuration, configSaved = false }: Props) {
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm({
-        company_name: configuration.company_name ?? '',
-        address:      configuration.address ?? '',
-        tagline:      configuration.tagline ?? '',
-        phone:        configuration.phone ?? '',
-        email:        configuration.email ?? '',
-        adult_rate:   String(configuration.adult_rate  ?? 0),
-        child_rate:   String(configuration.child_rate  ?? 0),
-        infant_rate:  String(configuration.infant_rate ?? 0),
-        sr_rate:      String(configuration.sr_rate     ?? 1),
+        company_name:           configuration.company_name ?? '',
+        address:                configuration.address ?? '',
+        tagline:                configuration.tagline ?? '',
+        phone:                  configuration.phone ?? '',
+        email:                  configuration.email ?? '',
+        adult_rate:             String(configuration.adult_rate  ?? 0),
+        child_rate:             String(configuration.child_rate  ?? 0),
+        infant_rate:            String(configuration.infant_rate ?? 0),
+        sr_rate:                String(configuration.sr_rate     ?? 1),
+        makkah_contact1_name:   configuration.makkah_contact1_name ?? '',
+        makkah_contact1_phone:  configuration.makkah_contact1_phone ?? '',
+        makkah_contact2_name:   configuration.makkah_contact2_name ?? '',
+        makkah_contact2_phone:  configuration.makkah_contact2_phone ?? '',
+        madina_contact1_name:   configuration.madina_contact1_name ?? '',
+        madina_contact1_phone:  configuration.madina_contact1_phone ?? '',
+        madina_contact2_name:   configuration.madina_contact2_name ?? '',
+        madina_contact2_phone:  configuration.madina_contact2_phone ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -156,6 +172,69 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
                                 placeholder="1.00"
                             />
                             <InputError message={errors.sr_rate} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Emergency Contacts */}
+                <div className="border-t pt-4">
+                    <p className="mb-3 text-sm font-medium text-muted-foreground">Emergency Contacts (shown on vouchers)</p>
+
+                    {/* Makkah */}
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Makkah</p>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="makkah1-name">Contact 1 — Name</Label>
+                            <Input id="makkah1-name" placeholder="e.g. Ahmed Ali"
+                                value={data.makkah_contact1_name}
+                                onChange={e => setData('makkah_contact1_name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="makkah1-phone">Contact 1 — Phone</Label>
+                            <Input id="makkah1-phone" placeholder="+966 5X XXX XXXX"
+                                value={data.makkah_contact1_phone}
+                                onChange={e => setData('makkah_contact1_phone', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="makkah2-name">Contact 2 — Name</Label>
+                            <Input id="makkah2-name" placeholder="e.g. Hassan Khan"
+                                value={data.makkah_contact2_name}
+                                onChange={e => setData('makkah_contact2_name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="makkah2-phone">Contact 2 — Phone</Label>
+                            <Input id="makkah2-phone" placeholder="+966 5X XXX XXXX"
+                                value={data.makkah_contact2_phone}
+                                onChange={e => setData('makkah_contact2_phone', e.target.value)} />
+                        </div>
+                    </div>
+
+                    {/* Madina */}
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Madina</p>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                            <Label htmlFor="madina1-name">Contact 1 — Name</Label>
+                            <Input id="madina1-name" placeholder="e.g. Usman Shah"
+                                value={data.madina_contact1_name}
+                                onChange={e => setData('madina_contact1_name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="madina1-phone">Contact 1 — Phone</Label>
+                            <Input id="madina1-phone" placeholder="+966 5X XXX XXXX"
+                                value={data.madina_contact1_phone}
+                                onChange={e => setData('madina_contact1_phone', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="madina2-name">Contact 2 — Name</Label>
+                            <Input id="madina2-name" placeholder="e.g. Bilal Hussain"
+                                value={data.madina_contact2_name}
+                                onChange={e => setData('madina_contact2_name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="madina2-phone">Contact 2 — Phone</Label>
+                            <Input id="madina2-phone" placeholder="+966 5X XXX XXXX"
+                                value={data.madina_contact2_phone}
+                                onChange={e => setData('madina_contact2_phone', e.target.value)} />
                         </div>
                     </div>
                 </div>

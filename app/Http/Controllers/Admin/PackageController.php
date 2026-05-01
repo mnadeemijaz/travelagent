@@ -34,22 +34,25 @@ class PackageController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'   => ['required', 'string', 'max:150'],
-            'price'  => ['required', 'string', 'max:50'],
-            'image'  => ['required', 'image', 'max:2048'],
+            'name'   => ['nullable', 'string', 'max:150'],
+            'price'  => ['nullable', 'string', 'max:50'],
+            'image'  => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
         ]);
 
-        $file      = $request->file('image');
-        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-        $filename  = Str::random(40) . '.' . $extension;
-        $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'packages');
-        $file->move($savePath, $filename);
-        $path      = 'packages/' . $filename;
+        $path = null;
+        if ($request->hasFile('image')) {
+            $file      = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'packages');
+            $file->move($savePath, $filename);
+            $path      = 'packages/' . $filename;
+        }
 
         Package::create([
-            'name'   => $validated['name'],
-            'price'  => $validated['price'],
+            'name'   => $validated['name'] ?? null,
+            'price'  => $validated['price'] ?? null,
             'image'  => $path,
             'active' => $validated['active'] ?? true,
         ]);
@@ -73,8 +76,8 @@ class PackageController extends Controller
     public function update(Request $request, Package $package): RedirectResponse
     {
         $validated = $request->validate([
-            'name'   => ['required', 'string', 'max:150'],
-            'price'  => ['required', 'string', 'max:50'],
+            'name'   => ['nullable', 'string', 'max:150'],
+            'price'  => ['nullable', 'string', 'max:50'],
             'image'  => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
         ]);
@@ -89,8 +92,8 @@ class PackageController extends Controller
             $package->image = 'packages/' . $filename;
         }
 
-        $package->name   = $validated['name'];
-        $package->price  = $validated['price'];
+        $package->name   = $validated['name'] ?? null;
+        $package->price  = $validated['price'] ?? null;
         $package->active = $validated['active'] ?? $package->active;
         $package->save();
 

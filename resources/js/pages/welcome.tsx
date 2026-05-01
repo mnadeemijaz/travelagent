@@ -107,7 +107,7 @@ const aboutSlides = [
 const partners1 = [
     { name: 'IATA', fullName: 'International Air Transport Association', image: "storage/front/iata.png" as string | null },
     { name: 'PSA',  fullName: 'Pakistan Survey Authority',               image: "storage/front/psa.png" as string | null },
-    { name: 'PIA',  fullName: 'Pakistan International Airlines',       image: "storage/front/pia.png" as string | null },
+    { name: 'PVT',  fullName: 'Pvt Ltd',       image: "storage/front/pvt.png" as string | null },
     { name: 'TAAP',  fullName: 'Travel Agents Association of Pakistan',       image: "storage/front/taap.png" as string | null },
 ];
 const partners = [
@@ -834,7 +834,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     'IATA ACCREDITED AGENT',
                                     'PSA HOLDER',
                                     'PERSONLY UMRAH AGGREMENT',
-                                    'Government approved AGENCY',
+                                    'GOVERNMENT APPROVED AGENCY',
                                     '24/7 CUSTOMER SUPPORT'
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-2 text-sm text-gray-700">
@@ -981,12 +981,14 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                                 <p className="text-xs text-gray-400">Starting from</p>
                                                 <p className="text-base font-bold text-teal-600">{pkg.price}</p>
                                             </div>
+                                             {!auth.user && (
                                             <button
                                                 onClick={openRegister}
                                                 className="rounded-full bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-700"
                                             >
                                                 Book Now
                                             </button>
+                                             )}
                                         </div>
                                     </div>
                                 </div>

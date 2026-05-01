@@ -35,24 +35,27 @@ class DestinationController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'    => ['required', 'string', 'max:100'],
+            'name'    => ['nullable', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
-            'price'   => [  'max:50'],
-            'image'   => ['required', 'image', 'max:2048'],
+            'price'   => ['nullable', 'max:50'],
+            'image'   => ['nullable', 'image', 'max:2048'],
             'active'  => ['boolean'],
         ]);
 
-        $file      = $request->file('image');
-        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-        $filename  = Str::random(40) . '.' . $extension;
-        $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'destinations');
-        $file->move($savePath, $filename);
-        $path      = 'destinations/' . $filename;
+        $path = null;
+        if ($request->hasFile('image')) {
+            $file      = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'destinations');
+            $file->move($savePath, $filename);
+            $path      = 'destinations/' . $filename;
+        }
 
         Destination::create([
-            'name'    => $validated['name'],
+            'name'    => $validated['name'] ?? null,
             'country' => $validated['country'] ?? null,
-            'price'   => $validated['price'],
+            'price'   => $validated['price'] ?? null,
             'image'   => $path,
             'active'  => $validated['active'] ?? true,
         ]);
@@ -77,9 +80,9 @@ class DestinationController extends Controller
     public function update(Request $request, Destination $destination): RedirectResponse
     {
         $validated = $request->validate([
-            'name'    => ['required', 'string', 'max:100'],
+            'name'    => ['nullable', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
-            'price'   => [ 'max:50'],
+            'price'   => ['nullable', 'max:50'],
             'image'   => ['nullable', 'image', 'max:2048'],
             'active'  => ['boolean'],
         ]);
@@ -94,9 +97,9 @@ class DestinationController extends Controller
             $destination->image = 'destinations/' . $filename;
         }
 
-        $destination->name    = $validated['name'];
+        $destination->name    = $validated['name'] ?? null;
         $destination->country = $validated['country'] ?? null;
-        $destination->price   = $validated['price'];
+        $destination->price   = $validated['price'] ?? null;
         $destination->active  = $validated['active'] ?? $destination->active;
         $destination->save();
 

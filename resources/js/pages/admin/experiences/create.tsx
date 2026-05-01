@@ -35,13 +35,13 @@ export default function ExperiencesCreate() {
 
                 <form onSubmit={submit} className="max-w-lg space-y-5">
                     <div className="space-y-1">
-                        <Label>Experience Name</Label>
+                        <Label>Experience Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input placeholder="e.g. Mountain Treks" value={data.name} onChange={e => setData('name', e.target.value)} />
                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Image</Label>
+                        <Label>Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <ImageUpload onChange={file => setData('image', file)} error={errors.image} />
                     </div>
 

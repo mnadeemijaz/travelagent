@@ -35,7 +35,7 @@ export default function DestinationsCreate() {
 
                 <form onSubmit={submit} className="max-w-lg space-y-5">
                     <div className="space-y-1">
-                        <Label>Destination Name</Label>
+                        <Label>Destination Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input placeholder="e.g. Dubai" value={data.name} onChange={e => setData('name', e.target.value)} />
                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
@@ -47,13 +47,13 @@ export default function DestinationsCreate() {
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Price</Label>
+                        <Label>Price <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input placeholder="e.g. PKR 85,000" value={data.price} onChange={e => setData('price', e.target.value)} />
                         {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Image</Label>
+                        <Label>Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <ImageUpload onChange={file => setData('image', file)} error={errors.image} />
                     </div>
 

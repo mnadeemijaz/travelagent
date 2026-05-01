@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Hotel {
     city_name: string;
@@ -24,6 +25,7 @@ interface Client {
 
 interface VoucherData {
     id: number;
+    share_url: string;
     date: string | null;
     approved: boolean;
     t_adult: number;
@@ -59,7 +61,13 @@ interface Props {
     hotels: Hotel[];
     clients: Client[];
     ziarats: { name: string; amount: number }[];
-    company: { name: string; address: string; phone: string; email: string };
+    company: {
+        name: string; address: string; phone: string; email: string;
+        makkah_contact1_name: string | null; makkah_contact1_phone: string | null;
+        makkah_contact2_name: string | null; makkah_contact2_phone: string | null;
+        madina_contact1_name: string | null; madina_contact1_phone: string | null;
+        madina_contact2_name: string | null; madina_contact2_phone: string | null;
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -156,8 +164,17 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                                     <p className="text-xs text-gray-600 m-0">{company.address}</p>
                                     <p className="text-xs text-gray-600 m-0">{company.phone} | {company.email}</p>
                                 </td>
-                                <td className="w-1/4 text-right align-bottom text-xs text-gray-600">
-                                    Agent: {voucher.agent_name}
+                                <td className="w-1/4 text-right align-top text-xs text-gray-600">
+                                    <div className="flex flex-col items-end gap-1">
+                                        <QRCodeSVG
+                                            value={voucher.share_url}
+                                            size={72}
+                                            level="M"
+                                            includeMargin={false}
+                                        />
+                                        <span className="text-[10px] text-gray-500">Scan to verify</span>
+                                        <span>Agent: {voucher.agent_name}</span>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -199,7 +216,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                     </table>
 
                     {/* KSA Arrival */}
-                    <SectionHeading>KSA Arrival Information</SectionHeading>
+                    <SectionHeading>Departure Information</SectionHeading>
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
@@ -221,7 +238,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                     </table>
 
                     {/* Departure */}
-                    <SectionHeading>Departure Information</SectionHeading>
+                    <SectionHeading>Return Information</SectionHeading>
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
@@ -311,7 +328,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                         <img
                             src="/storage/front/al_abrar.jpg"
                             alt="AL Abrar"
-                            className="w-full max-h-32 object-contain"
+                            className="w-full block"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                     </div>
@@ -323,6 +340,33 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                             </tr>
                         </tbody>
                     </table>
+
+                    {/* Emergency Contacts */}
+                    {(company.makkah_contact1_name || company.makkah_contact2_name || company.madina_contact1_name || company.madina_contact2_name) && (
+                        <div className="mt-3 border-t border-gray-300 pt-2">
+                            <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Emergency Contacts</div>
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Makkah</th>
+                                        <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Madina</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="border border-gray-400 px-2 py-1 text-xs">
+                                            {company.makkah_contact1_name && <div>{company.makkah_contact1_name}: <span className="font-semibold">{company.makkah_contact1_phone}</span></div>}
+                                            {company.makkah_contact2_name && <div>{company.makkah_contact2_name}: <span className="font-semibold">{company.makkah_contact2_phone}</span></div>}
+                                        </td>
+                                        <td className="border border-gray-400 px-2 py-1 text-xs">
+                                            {company.madina_contact1_name && <div>{company.madina_contact1_name}: <span className="font-semibold">{company.madina_contact1_phone}</span></div>}
+                                            {company.madina_contact2_name && <div>{company.madina_contact2_name}: <span className="font-semibold">{company.madina_contact2_phone}</span></div>}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
 

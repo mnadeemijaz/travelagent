@@ -33,20 +33,23 @@ class ExperienceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'   => ['required', 'string', 'max:150'],
-            'image'  => ['required', 'image', 'max:2048'],
+            'name'   => ['nullable', 'string', 'max:150'],
+            'image'  => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
         ]);
 
-        $file      = $request->file('image');
-        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-        $filename  = Str::random(40) . '.' . $extension;
-        $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'experiences');
-        $file->move($savePath, $filename);
-        $path      = 'experiences/' . $filename;
+        $path = null;
+        if ($request->hasFile('image')) {
+            $file      = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'experiences');
+            $file->move($savePath, $filename);
+            $path      = 'experiences/' . $filename;
+        }
 
         Experience::create([
-            'name'   => $validated['name'],
+            'name'   => $validated['name'] ?? null,
             'image'  => $path,
             'active' => $validated['active'] ?? true,
         ]);
@@ -69,7 +72,7 @@ class ExperienceController extends Controller
     public function update(Request $request, Experience $experience): RedirectResponse
     {
         $validated = $request->validate([
-            'name'   => ['required', 'string', 'max:150'],
+            'name'   => ['nullable', 'string', 'max:150'],
             'image'  => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
         ]);
@@ -84,7 +87,7 @@ class ExperienceController extends Controller
             $experience->image = 'experiences/' . $filename;
         }
 
-        $experience->name   = $validated['name'];
+        $experience->name   = $validated['name'] ?? null;
         $experience->active = $validated['active'] ?? $experience->active;
         $experience->save();
 

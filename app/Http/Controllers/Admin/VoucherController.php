@@ -16,6 +16,10 @@ use App\Models\Vehicle;
 use App\Models\Voucher;
 use App\Models\VoucherHotel;
 use App\Models\Ziarat;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -363,14 +367,15 @@ class VoucherController extends Controller
         return [
             'voucher' => [
                 'id'              => $voucher->id,
-                'date'            => $voucher->date?->format('d M Y'),
+                'share_url'       => route('voucher.public', $voucher->share_token),
+                'date'            => $voucher->date?->format('d-m-Y'),
                 'approved'        => (bool) $voucher->approved,
                 't_adult'         => $voucher->t_adult,
                 't_child'         => $voucher->t_child,
                 't_infant'        => $voucher->t_infant,
-                'arv_date'        => $voucher->arv_date?->format('d M Y'),
-                'ret_date'        => $voucher->ret_date?->format('d M Y'),
-                'dep_date'        => $voucher->dep_date?->format('d M Y'),
+                'arv_date'        => $voucher->arv_date?->format('d-m-Y'),
+                'ret_date'        => $voucher->ret_date?->format('d-m-Y'),
+                'dep_date'        => $voucher->dep_date?->format('d-m-Y'),
                 'dep_time'        => $voucher->dep_time,
                 'arv_time'        => $voucher->arv_time,
                 'ret_time'        => $voucher->ret_time,
@@ -400,8 +405,8 @@ class VoucherController extends Controller
             'hotels' => $voucher->hotels->map(fn($h) => [
                 'city_name'  => $h->city_name,
                 'hotel_name' => $h->hotel?->name,
-                'check_in'   => $h->check_in?->format('d M Y'),
-                'check_out'  => $h->check_out?->format('d M Y'),
+                'check_in'   => $h->check_in?->format('d-m-Y'),
+                'check_out'  => $h->check_out?->format('d-m-Y'),
                 'city_nights'=> $h->city_nights,
                 'room_type'  => $h->room_type,
                 'price'      => (float) $h->price,
@@ -411,17 +416,25 @@ class VoucherController extends Controller
                 'name'       => $c->name,
                 'last_name'  => $c->last_name,
                 'ppno'       => $c->ppno,
-                'dob'        => $c->dob?->format('d M Y'),
+                'dob'        => $c->dob?->format('d-m-Y'),
                 'age_group'  => $c->age_group,
                 'visa_no'    => $c->visa_no,
-                'visa_date'  => $c->visa_date?->format('d M Y'),
+                'visa_date'  => $c->visa_date?->format('d-m-Y'),
             ]),
             'ziarats' => $voucher->ziarats->map(fn($z) => ['name' => $z->name, 'amount' => (float) $z->amount]),
             'company' => [
-                'name'    => $config->company_name,
-                'address' => $config->address,
-                'phone'   => $config->phone,
-                'email'   => $config->email,
+                'name'                  => $config->company_name,
+                'address'               => $config->address,
+                'phone'                 => $config->phone,
+                'email'                 => $config->email,
+                'makkah_contact1_name'  => $config->makkah_contact1_name,
+                'makkah_contact1_phone' => $config->makkah_contact1_phone,
+                'makkah_contact2_name'  => $config->makkah_contact2_name,
+                'makkah_contact2_phone' => $config->makkah_contact2_phone,
+                'madina_contact1_name'  => $config->madina_contact1_name,
+                'madina_contact1_phone' => $config->madina_contact1_phone,
+                'madina_contact2_name'  => $config->madina_contact2_name,
+                'madina_contact2_phone' => $config->madina_contact2_phone,
             ],
         ];
     }
@@ -438,11 +451,23 @@ class VoucherController extends Controller
 
     // ── Voucher PDF ────────────────────────────────────────────────────────────
 
+    private function qrCodeBase64(string $url): string
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(120),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $svg = $writer->writeString($url);
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
     public function voucherPdf(Voucher $voucher): HttpResponse
     {
         $data = $this->voucherPayload($voucher);
-        $data['logoPath'] = storage_path('app/public/icon.png');
+        $data['logoPath']         = storage_path('app/public/icon.png');
         $data['instructionsPath'] = storage_path('app/public/al_abrar.jpg');
+        $data['qrCodeBase64']     = $this->qrCodeBase64($data['voucher']['share_url']);
         $pdf = Pdf::loadView('pdf.voucher', $data)->setPaper('a4', 'portrait');
         return $pdf->download("voucher-{$voucher->id}.pdf");
     }
@@ -450,8 +475,9 @@ class VoucherController extends Controller
     public function invoicePdf(Voucher $voucher): HttpResponse
     {
         $data = $this->voucherPayload($voucher);
-        $data['logoPath'] = storage_path('app/public/icon.png');
+        $data['logoPath']         = storage_path('app/public/icon.png');
         $data['instructionsPath'] = storage_path('app/public/al_abrar.jpg');
+        $data['qrCodeBase64']     = $this->qrCodeBase64($data['voucher']['share_url']);
         $pdf = Pdf::loadView('pdf.voucher-invoice', $data)->setPaper('a4', 'portrait');
         return $pdf->download("invoice-{$voucher->id}.pdf");
     }

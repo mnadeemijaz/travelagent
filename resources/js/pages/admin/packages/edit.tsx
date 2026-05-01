@@ -37,13 +37,13 @@ export default function PackagesEdit({ package: pkg }: { package: PkgProp }) {
 
                 <form onSubmit={submit} className="max-w-lg space-y-5">
                     <div className="space-y-1">
-                        <Label>Package Name</Label>
+                        <Label>Package Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input value={data.name} onChange={e => setData('name', e.target.value)} />
                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Price</Label>
+                        <Label>Price <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input value={data.price} onChange={e => setData('price', e.target.value)} />
                         {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
                     </div>

@@ -35,27 +35,31 @@ class HotelImageController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:150'],
-            'city_name' => ['required', 'string', 'max:100'],
-            'price'     => ['required', 'numeric', 'min:0'],
-            'image'     => ['required', 'image', 'max:2048'],
+            'name'      => ['nullable', 'string', 'max:150'],
+            'city_name' => ['nullable', 'string', 'max:100'],
+            'price'     => ['nullable', 'numeric', 'min:0'],
+            'image'     => ['nullable', 'image', 'max:2048'],
             'active'    => ['boolean'],
         ]);
 
-        $file      = $request->file('image');
-        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-        $filename  = Str::random(40) . '.' . $extension;
-        $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'hotel-images');
-        if (!is_dir($savePath)) {
-            mkdir($savePath, 0755, true);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file      = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'hotel-images');
+            if (!is_dir($savePath)) {
+                mkdir($savePath, 0755, true);
+            }
+            $file->move($savePath, $filename);
+            $imagePath = 'hotel-images/' . $filename;
         }
-        $file->move($savePath, $filename);
 
         HotelImage::create([
-            'name'      => $validated['name'],
-            'city_name' => $validated['city_name'],
-            'price'     => $validated['price'],
-            'image'     => 'hotel-images/' . $filename,
+            'name'      => $validated['name'] ?? null,
+            'city_name' => $validated['city_name'] ?? null,
+            'price'     => $validated['price'] ?? null,
+            'image'     => $imagePath,
             'active'    => $validated['active'] ?? true,
         ]);
 
@@ -79,9 +83,9 @@ class HotelImageController extends Controller
     public function update(Request $request, HotelImage $hotelImage): RedirectResponse
     {
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:150'],
-            'city_name' => ['required', 'string', 'max:100'],
-            'price'     => ['required', 'numeric', 'min:0'],
+            'name'      => ['nullable', 'string', 'max:150'],
+            'city_name' => ['nullable', 'string', 'max:100'],
+            'price'     => ['nullable', 'numeric', 'min:0'],
             'image'     => ['nullable', 'image', 'max:2048'],
             'active'    => ['boolean'],
         ]);
@@ -99,9 +103,9 @@ class HotelImageController extends Controller
             $hotelImage->image = 'hotel-images/' . $filename;
         }
 
-        $hotelImage->name      = $validated['name'];
-        $hotelImage->city_name = $validated['city_name'];
-        $hotelImage->price     = $validated['price'];
+        $hotelImage->name      = $validated['name'] ?? null;
+        $hotelImage->city_name = $validated['city_name'] ?? null;
+        $hotelImage->price     = $validated['price'] ?? null;
         $hotelImage->active    = $validated['active'] ?? $hotelImage->active;
         $hotelImage->save();
 

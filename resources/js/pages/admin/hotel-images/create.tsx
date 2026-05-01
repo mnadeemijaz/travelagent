@@ -35,25 +35,25 @@ export default function HotelImagesCreate() {
 
                 <form onSubmit={submit} className="max-w-lg space-y-5">
                     <div className="space-y-1">
-                        <Label>Hotel Name</Label>
+                        <Label>Hotel Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input placeholder="e.g. Makkah Grand Hotel" value={data.name} onChange={e => setData('name', e.target.value)} />
                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>City Name</Label>
+                        <Label>City Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input placeholder="e.g. Makkah" value={data.city_name} onChange={e => setData('city_name', e.target.value)} />
                         {errors.city_name && <p className="text-xs text-destructive">{errors.city_name}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Price (PKR)</Label>
+                        <Label>Price (PKR) <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input type="number" min="0" placeholder="e.g. 150000" value={data.price} onChange={e => setData('price', e.target.value)} />
                         {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Image</Label>
+                        <Label>Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <ImageUpload onChange={file => setData('image', file)} error={errors.image} />
                     </div>
 

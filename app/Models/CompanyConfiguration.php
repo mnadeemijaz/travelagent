@@ -16,6 +16,14 @@ class CompanyConfiguration extends Model
         'child_rate',
         'infant_rate',
         'sr_rate',
+        'makkah_contact1_name',
+        'makkah_contact1_phone',
+        'makkah_contact2_name',
+        'makkah_contact2_phone',
+        'madina_contact1_name',
+        'madina_contact1_phone',
+        'madina_contact2_name',
+        'madina_contact2_phone',
     ];
 
     protected $casts = [

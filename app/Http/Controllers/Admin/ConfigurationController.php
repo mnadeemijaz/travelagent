@@ -17,10 +17,18 @@ class ConfigurationController extends Controller
             'tagline'      => ['nullable', 'string', 'max:200'],
             'phone'        => ['nullable', 'string', 'max:50'],
             'email'        => ['nullable', 'email', 'max:150'],
-            'adult_rate'   => ['nullable', 'numeric', 'min:0'],
-            'child_rate'   => ['nullable', 'numeric', 'min:0'],
-            'infant_rate'  => ['nullable', 'numeric', 'min:0'],
-            'sr_rate'      => ['nullable', 'numeric', 'min:0'],
+            'adult_rate'             => ['nullable', 'numeric', 'min:0'],
+            'child_rate'             => ['nullable', 'numeric', 'min:0'],
+            'infant_rate'            => ['nullable', 'numeric', 'min:0'],
+            'sr_rate'                => ['nullable', 'numeric', 'min:0'],
+            'makkah_contact1_name'   => ['nullable', 'string', 'max:100'],
+            'makkah_contact1_phone'  => ['nullable', 'string', 'max:50'],
+            'makkah_contact2_name'   => ['nullable', 'string', 'max:100'],
+            'makkah_contact2_phone'  => ['nullable', 'string', 'max:50'],
+            'madina_contact1_name'   => ['nullable', 'string', 'max:100'],
+            'madina_contact1_phone'  => ['nullable', 'string', 'max:50'],
+            'madina_contact2_name'   => ['nullable', 'string', 'max:100'],
+            'madina_contact2_phone'  => ['nullable', 'string', 'max:50'],
         ]);
 
         $config = CompanyConfiguration::instance();

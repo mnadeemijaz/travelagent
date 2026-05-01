@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VoucherPublicController;
 use App\Http\Controllers\Admin\AgentHotelController;
 use App\Http\Controllers\Admin\BankDetailController;
 use App\Http\Controllers\MediaController;
@@ -32,6 +33,9 @@ use Inertia\Inertia;
 Route::get('/media/{path}', [MediaController::class, 'serve'])
     ->where('path', '.+')
     ->name('media.serve');
+
+// ── Public voucher view (token-secured, no login required) ───────────────────
+Route::get('/v/{token}', [VoucherPublicController::class, 'show'])->name('voucher.public');
 
 // ── Public group tickets ───────────────────────────────────────────────────────
 Route::get('/group-tickets', [GroupTicketPublicController::class, 'index'])->name('group-tickets.index');

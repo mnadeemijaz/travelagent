@@ -37,7 +37,7 @@ export default function ExperiencesEdit({ experience }: { experience: ExpProp })
 
                 <form onSubmit={submit} className="max-w-lg space-y-5">
                     <div className="space-y-1">
-                        <Label>Experience Name</Label>
+                        <Label>Experience Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input value={data.name} onChange={e => setData('name', e.target.value)} />
                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>

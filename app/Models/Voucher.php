@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 class Voucher extends Model {
     protected $fillable = [
         'agent_id','date','dep_date','dep_time','arv_date','arv_time',
@@ -11,8 +12,15 @@ class Voucher extends Model {
         'adult_rate','child_rate','infant_rate','sr_rate',
         'total','t_adult','t_child','t_infant',
         'remarks','contact','gp_hd_no',
-        'approved','isDeleted',
+        'approved','isDeleted','share_token',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Voucher $voucher) {
+            $voucher->share_token = Str::random(64);
+        });
+    }
     protected $casts = [
         'date'     => 'date',
         'dep_date' => 'date',
