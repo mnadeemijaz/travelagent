@@ -35,6 +35,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 const ROOM_TYPES = ['sharing','single_bed','double_bed','triple_bed','quad_bed','five_bed','six_bed'];
 const emptyHotel = (): HotelRow => ({ city_name: '', city_nights: '0', check_in: '', check_out: '', hotel_id: '', price: '', room_type: 'sharing' });
 
+function addDays(dateStr: string, days: number): string {
+    if (!dateStr || days <= 0) return '';
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().substring(0, 10);
+}
+
+function cascadeHotelDates(hotels: HotelRow[], startDate: string): HotelRow[] {
+    let cursor = startDate || '';
+    return hotels.map(h => {
+        const nights = parseInt(h.city_nights) || 0;
+        const check_in = cursor;
+        const check_out = cursor && nights > 0 ? addDays(cursor, nights) : '';
+        cursor = check_out || cursor;
+        return { ...h, check_in, check_out };
+    });
+}
+
 export default function VouchersCreate({
     agents, isAgent, agentHotels, flights, sectors, vehicles, trips, tourPackages, ziarats, defaultRates,
 }: {
@@ -97,6 +115,24 @@ export default function VouchersCreate({
     }
     useEffect(() => { if (showPaxModal) setSelectedIds(new Set(data.client_ids)); }, [showPaxModal]);
 
+    // Total nights derived from departure → return dates
+    const flightNights = (data.dep_date && data.ret_date)
+        ? Math.max(0, Math.round((new Date(data.ret_date).getTime() - new Date(data.dep_date).getTime()) / 86400000))
+        : null;
+
+    // Base date for hotel row 0 check-in: prefer arv_date, fall back to dep_date
+    const hotelStartDate = data.arv_date || data.dep_date || '';
+
+    // When arv_date or dep_date changes, recascade all hotel dates
+    function handleArvDateChange(val: string) {
+        const base = val || data.dep_date || '';
+        setData(d => ({ ...d, arv_date: val, hotels: base ? cascadeHotelDates(d.hotels, base) : d.hotels }));
+    }
+    function handleDepDateChange(val: string) {
+        const base = data.arv_date || val || '';
+        setData(d => ({ ...d, dep_date: val, hotels: base ? cascadeHotelDates(d.hotels, base) : d.hotels }));
+    }
+
     // Available hotels for the currently selected agent
     const availableHotels: AgentHotelOption[] = agentHotels[data.agent_id] ?? [];
 
@@ -109,41 +145,57 @@ export default function VouchersCreate({
     function addHotelRow() { setData('hotels', [...data.hotels, emptyHotel()]); }
     function removeHotelRow(idx: number) { setData('hotels', data.hotels.filter((_, i) => i !== idx)); }
     function setHotel(idx: number, field: keyof HotelRow, val: string) {
-        const rows = [...data.hotels];
+        const rows = data.hotels.map(r => ({ ...r }));
         const updated = { ...rows[idx], [field]: val };
 
-        // Auto-calculate nights from check-in / check-out
+        if (field === 'city_nights') {
+            let nights = parseInt(val) || 0;
+            // Clamp to remaining flight nights
+            if (flightNights !== null) {
+                const used = rows.reduce((s, r, i) => i === idx ? s : s + (parseInt(r.city_nights) || 0), 0);
+                nights = Math.min(nights, Math.max(0, flightNights - used));
+            }
+            updated.city_nights = String(nights);
+            // Derive check_in from previous row's check_out, or the base start date for row 0
+            const prevOut = idx > 0 ? rows[idx - 1].check_out : hotelStartDate;
+            updated.check_in = prevOut;
+            updated.check_out = prevOut && nights > 0 ? addDays(prevOut, nights) : '';
+        }
+
+        // Recalculate nights when check_in / check_out is edited manually
         if (field === 'check_in' || field === 'check_out') {
             const ci = field === 'check_in' ? val : updated.check_in;
             const co = field === 'check_out' ? val : updated.check_out;
             if (ci && co) {
-                const nights = Math.round((new Date(co).getTime() - new Date(ci).getTime()) / 86400000);
-                if (nights >= 0) updated.city_nights = String(nights);
+                const n = Math.round((new Date(co).getTime() - new Date(ci).getTime()) / 86400000);
+                if (n >= 0) updated.city_nights = String(n);
             }
         }
 
-        // Clear hotel + price + room_type when city changes
         if (field === 'city_name') { updated.hotel_id = ''; updated.price = ''; updated.room_type = 'sharing'; }
 
-        // Auto-fill room_type (first available) + price when hotel is selected
         if (field === 'hotel_id' && val) {
-            const hotelEntries = availableHotels.filter(h => String(h.id) === val);
-            const firstEntry = hotelEntries[0];
-            if (firstEntry) {
-                updated.room_type = firstEntry.room_type;
-                updated.price = String(firstEntry.price);
-            } else {
-                updated.price = '';
-            }
+            const entry = availableHotels.find(h => String(h.id) === val);
+            if (entry) { updated.room_type = entry.room_type; updated.price = String(entry.price); }
+            else updated.price = '';
         }
 
-        // Auto-fill price when room type changes (and hotel is already selected)
         if (field === 'room_type' && updated.hotel_id) {
             const found = availableHotels.find(h => String(h.id) === updated.hotel_id && h.room_type === val);
             if (found) updated.price = String(found.price);
         }
 
         rows[idx] = updated;
+
+        // Cascade dates forward through subsequent rows when nights change
+        if (field === 'city_nights') {
+            for (let i = idx + 1; i < rows.length; i++) {
+                const prev = rows[i - 1].check_out;
+                const n = parseInt(rows[i].city_nights) || 0;
+                rows[i] = { ...rows[i], check_in: prev || '', check_out: prev && n > 0 ? addDays(prev, n) : '' };
+            }
+        }
+
         setData('hotels', rows);
     }
 
@@ -151,7 +203,6 @@ export default function VouchersCreate({
         const filtered = cityName
             ? availableHotels.filter(h => h.city_name.toLowerCase() === cityName.toLowerCase())
             : availableHotels;
-        // Deduplicate by hotel id (each hotel may appear once per room type)
         const seen = new Set<number>();
         return filtered.filter(h => { if (seen.has(h.id)) return false; seen.add(h.id); return true; });
     }
@@ -167,6 +218,7 @@ export default function VouchersCreate({
     }
 
     const totalNights = data.hotels.reduce((s, h) => s + (parseInt(h.city_nights) || 0), 0);
+    const nightsRemaining = flightNights !== null ? flightNights - totalNights : null;
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -217,9 +269,9 @@ export default function VouchersCreate({
                         <div className="mb-4">
                             <h3 className="mb-2 text-sm font-medium text-muted-foreground">Departure</h3>
                             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                                <div className="space-y-1"><Label>Dep. Date</Label><Input type="date" value={data.dep_date} onChange={e => setData('dep_date', e.target.value)} /></div>
+                                <div className="space-y-1"><Label>Dep. Date</Label><Input type="date" value={data.dep_date} onChange={e => handleDepDateChange(e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Dep. Time</Label><Input type="time" value={data.dep_time} onChange={e => setData('dep_time', e.target.value)} /></div>
-                                <div className="space-y-1"><Label>Arrival Date</Label><Input type="date" value={data.arv_date} onChange={e => setData('arv_date', e.target.value)} /></div>
+                                <div className="space-y-1"><Label>Arrival Date</Label><Input type="date" value={data.arv_date} onChange={e => handleArvDateChange(e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Arrival Time</Label><Input type="time" value={data.arv_time} onChange={e => setData('arv_time', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Sector From</Label>
                                     <select value={data.dep_sector1} onChange={e => setData('dep_sector1', e.target.value)}
@@ -273,6 +325,14 @@ export default function VouchersCreate({
                                 </div>
                                 <div className="space-y-1"><Label>Flight No</Label><Input value={data.ret_flight_no} onChange={e => setData('ret_flight_no', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>PNR No</Label><Input value={data.ret_pnr_no} onChange={e => setData('ret_pnr_no', e.target.value)} /></div>
+                                {flightNights !== null && (
+                                    <div className="space-y-1">
+                                        <Label>Total Nights</Label>
+                                        <div className="flex h-9 items-center rounded-md border border-input bg-muted px-3 text-sm font-semibold text-primary">
+                                            {flightNights}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -376,8 +436,12 @@ export default function VouchersCreate({
                                         <option value="Makkah">Makkah</option>
                                         <option value="Madina">Madina</option>
                                     </select>
-                                    <Input type="number" min={0} value={row.city_nights}
-                                        onChange={e => setHotel(idx, 'city_nights', e.target.value)} />
+                                    <Input
+                                        type="number" min={0}
+                                        max={flightNights !== null ? flightNights : undefined}
+                                        value={row.city_nights}
+                                        onChange={e => setHotel(idx, 'city_nights', e.target.value)}
+                                    />
                                     <Input type="date" value={row.check_in}
                                         onChange={e => setHotel(idx, 'check_in', e.target.value)} />
                                     <Input type="date" value={row.check_out}
@@ -413,7 +477,14 @@ export default function VouchersCreate({
                         </div>
                         <div className="mt-2 flex items-center gap-4">
                             <Button type="button" variant="outline" size="sm" onClick={addHotelRow}>+ Add Hotel</Button>
-                            <span className="text-sm text-muted-foreground">Total Nights: <strong>{totalNights}</strong></span>
+                            <span className="text-sm text-muted-foreground">
+                                Total Nights: <strong>{totalNights}</strong>
+                                {flightNights !== null && (
+                                    <span className={nightsRemaining! < 0 ? 'ml-2 text-destructive' : 'ml-2 text-muted-foreground'}>
+                                        ({nightsRemaining! >= 0 ? `${nightsRemaining} remaining` : `${Math.abs(nightsRemaining!)} over limit`})
+                                    </span>
+                                )}
+                            </span>
                         </div>
                     </div>
 
