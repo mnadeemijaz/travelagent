@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -109,7 +110,7 @@ export default function TransactionsIndex({
                             {transactions.data.map((t, i) => (
                                 <tr key={t.id} className="hover:bg-muted/30">
                                     <td className="px-4 py-2">{(transactions.current_page - 1) * transactions.per_page + i + 1}</td>
-                                    <td className="px-4 py-2">{t.date?.substring(0, 10)}</td>
+                                    <td className="px-4 py-2">{fmtDate(t.date)}</td>
                                     <td className="px-4 py-2">{t.agent?.name ?? '—'}</td>
                                     <td className="px-4 py-2 text-muted-foreground">{t.detail ?? '—'}</td>
                                     <td className="px-4 py-2">

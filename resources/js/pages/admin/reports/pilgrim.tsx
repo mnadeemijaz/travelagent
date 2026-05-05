@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -77,10 +78,10 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
                                     <td className="px-3 py-1.5">{(records.current_page - 1) * records.per_page + i + 1}</td>
                                     <td className="px-3 py-1.5 whitespace-nowrap">{[c.sr_name, c.name, c.last_name].filter(Boolean).join(' ')}</td>
                                     <td className="px-3 py-1.5">{c.ppno ?? '—'}</td>
-                                    <td className="px-3 py-1.5">{c.dob?.substring(0, 10) ?? '—'}</td>
+                                    <td className="px-3 py-1.5">{fmtDate(c.dob)}</td>
                                     <td className="px-3 py-1.5 capitalize">{c.age_group ?? '—'}</td>
-                                    <td className="px-3 py-1.5">{c.passport_issue_date?.substring(0, 10) ?? '—'}</td>
-                                    <td className="px-3 py-1.5">{c.passport_exp_date?.substring(0, 10) ?? '—'}</td>
+                                    <td className="px-3 py-1.5">{fmtDate(c.passport_issue_date)}</td>
+                                    <td className="px-3 py-1.5">{fmtDate(c.passport_exp_date)}</td>
                                     <td className="px-3 py-1.5">{c.agent?.name ?? '—'}</td>
                                     <td className="px-3 py-1.5">{c.visa_company?.name ?? '—'}</td>
                                     <td className="px-3 py-1.5">{[c.group_code, c.group_name].filter(Boolean).join(' / ') || '—'}</td>

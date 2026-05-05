@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -73,7 +74,7 @@ export default function DepartureReport({ records, agents, filters }: { records:
                                 <tr key={v.id} className="hover:bg-muted/30">
                                     <td className="px-3 py-1.5">{(records.current_page - 1) * records.per_page + i + 1}</td>
                                     <td className="px-3 py-1.5 font-mono">#{v.id}</td>
-                                    <td className="px-3 py-1.5">{v.date?.substring(0, 10) ?? '—'}</td>
+                                    <td className="px-3 py-1.5">{fmtDate(v.date)}</td>
                                     <td className="px-3 py-1.5">{v.dep_time ?? '—'}</td>
                                     <td className="px-3 py-1.5">{v.gp_hd_no ?? '—'}</td>
                                     <td className="px-3 py-1.5">{v.agent?.name ?? '—'}</td>

@@ -45,7 +45,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function fmtDate(val: string | null): string {
     if (!val) return '—';
-    return val.substring(0, 10);
+    const iso = val.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+    return val;
 }
 
 export default function ClientsIndex({

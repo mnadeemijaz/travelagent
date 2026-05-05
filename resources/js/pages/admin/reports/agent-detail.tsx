@@ -1,3 +1,4 @@
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -154,7 +155,7 @@ export default function AgentDetailReport({
                                 {drTransactions.map((t, i) => (
                                     <tr key={t.id} className="hover:bg-muted/30">
                                         <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                                        <td className="px-3 py-2">{t.date}</td>
+                                        <td className="px-3 py-2">{fmtDate(t.date)}</td>
                                         <td className="px-3 py-2">{t.detail}</td>
                                         <td className="px-3 py-2 text-muted-foreground">
                                             {t.voucher_id ? `#${t.voucher_id}` : '—'}
@@ -206,7 +207,7 @@ export default function AgentDetailReport({
                                 {crTransactions.map((t, i) => (
                                     <tr key={t.id} className="hover:bg-muted/30">
                                         <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                                        <td className="px-3 py-2">{t.date}</td>
+                                        <td className="px-3 py-2">{fmtDate(t.date)}</td>
                                         <td className="px-3 py-2">{t.detail}</td>
                                         <td className="px-3 py-2 text-muted-foreground">
                                             {t.voucher_id ? `#${t.voucher_id}` : '—'}
@@ -262,7 +263,7 @@ export default function AgentDetailReport({
                                     return (
                                         <tr key={t.id} className="hover:bg-muted/30">
                                             <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                                            <td className="px-3 py-2">{t.date}</td>
+                                            <td className="px-3 py-2">{fmtDate(t.date)}</td>
                                             <td className="px-3 py-2">{t.name}</td>
                                             <td className="px-3 py-2">{t.ticket_no}</td>
                                             <td className="px-3 py-2">{t.pnr}</td>

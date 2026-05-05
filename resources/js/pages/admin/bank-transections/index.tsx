@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -129,7 +130,7 @@ export default function BankTransectionsIndex({
                             {records.data.map((r, i) => (
                                 <tr key={r.id} className="hover:bg-muted/30">
                                     <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                                    <td className="px-3 py-2">{r.date}</td>
+                                    <td className="px-3 py-2">{fmtDate(r.date)}</td>
                                     <td className="px-3 py-2">{r.agent?.name ?? '—'}</td>
                                     <td className="px-3 py-2">{r.bank?.name ?? '—'}</td>
                                     <td className="px-3 py-2">{r.detail}</td>

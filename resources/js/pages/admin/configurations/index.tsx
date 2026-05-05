@@ -253,6 +253,20 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
                     </Transition>
                 </div>
             </form>
+
+            <div className="border-t pt-6">
+                <p className="mb-3 text-sm font-medium text-muted-foreground">Database Backup</p>
+                <a
+                    href={route('admin.configurations.backup')}
+                    className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0 0l-3-3m3 3l3-3M12 3a4 4 0 00-4 4v1H5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V10a2 2 0 00-2-2h-3V7a4 4 0 00-4-4z" />
+                    </svg>
+                    Backup Database
+                </a>
+                <p className="mt-2 text-xs text-muted-foreground">Downloads a full SQL dump of the database.</p>
+            </div>
         </div>
     );
 }

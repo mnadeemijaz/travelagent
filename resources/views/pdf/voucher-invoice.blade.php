@@ -261,7 +261,7 @@
 
 {{-- Emergency Contacts --}}
 @if($company['makkah_contact1_name'] || $company['makkah_contact2_name'] || $company['madina_contact1_name'] || $company['madina_contact2_name'])
-<div class="section-heading" style="margin-top:8px">Emergency Contacts</div>
+<div class="section-heading" style="margin-top:8px">Helper Contacts</div>
 <table style="margin-top:2px">
     <tr>
         <th style="width:50%">Makkah</th>

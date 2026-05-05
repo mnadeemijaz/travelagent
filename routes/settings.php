@@ -21,8 +21,8 @@ Route::middleware('auth')->group(function () {
     })->name('appearance');
 
     // Admin-only: company configuration
-    Route::middleware(['not.agent'])->post(
-        'admin/configurations',
-        [ConfigurationController::class, 'update']
-    )->name('admin.configurations.update');
+    Route::middleware(['not.agent'])->group(function () {
+        Route::post('admin/configurations', [ConfigurationController::class, 'update'])->name('admin.configurations.update');
+        Route::get('admin/configurations/backup', [ConfigurationController::class, 'backup'])->name('admin.configurations.backup');
+    });
 });

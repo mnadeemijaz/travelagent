@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -359,7 +360,7 @@ export default function VouchersCreate({
                                             <tr key={c.id}>
                                                 <td className="px-2 py-1">{c.sr_name} {c.name} {c.last_name}</td>
                                                 <td className="px-2 py-1">{c.ppno}</td>
-                                                <td className="px-2 py-1">{c.dob?.substring(0, 10)}</td>
+                                                <td className="px-2 py-1">{c.dob ? fmtDate(c.dob) : '—'}</td>
                                                 <td className="px-2 py-1 capitalize">{c.age_group}</td>
                                             </tr>
                                         ))}
@@ -617,7 +618,7 @@ export default function VouchersCreate({
                                             </td>
                                             <td className="px-2 py-1.5">{c.sr_name} {c.name} {c.last_name}</td>
                                             <td className="px-2 py-1.5">{c.ppno}</td>
-                                            <td className="px-2 py-1.5">{c.dob?.substring(0, 10)}</td>
+                                            <td className="px-2 py-1.5">{c.dob ? fmtDate(c.dob) : '—'}</td>
                                             <td className="px-2 py-1.5 capitalize">{c.age_group}</td>
                                             <td className="px-2 py-1.5">{c.account_pkg}</td>
                                             <td className="px-2 py-1.5">{c.group_code}</td>

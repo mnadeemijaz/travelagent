@@ -344,7 +344,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                     {/* Emergency Contacts */}
                     {(company.makkah_contact1_name || company.makkah_contact2_name || company.madina_contact1_name || company.madina_contact2_name) && (
                         <div className="mt-3 border-t border-gray-300 pt-2">
-                            <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Emergency Contacts</div>
+                            <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Helper Contacts</div>
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr>

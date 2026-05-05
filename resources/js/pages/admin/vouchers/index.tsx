@@ -32,7 +32,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Vouchers', href: '/admin/vouchers' },
 ];
 
-function fmtDate(v: string | null) { return v ? v.substring(0, 10) : '—'; }
+function fmtDate(v: string | null): string {
+    if (!v) return '—';
+    const iso = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+    return v;
+}
 
 export default function VouchersIndex({
     vouchers, agents, filters, flash,
