@@ -11,6 +11,10 @@ interface User {
     roles: string[];
     is_approved: boolean;
     created_at: string;
+    company_name: string | null;
+    address: string | null;
+    mobile: string | null;
+    logo_url: string | null;
 }
 
 interface Props {
@@ -73,8 +77,12 @@ export default function UsersIndex({ users, flash }: Props) {
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50 text-muted-foreground">
                             <tr>
+                                <th className="px-4 py-3 text-left font-medium">Logo</th>
                                 <th className="px-4 py-3 text-left font-medium">Name</th>
                                 <th className="px-4 py-3 text-left font-medium">Email</th>
+                                <th className="px-4 py-3 text-left font-medium">Company</th>
+                                <th className="px-4 py-3 text-left font-medium">Mobile</th>
+                                <th className="px-4 py-3 text-left font-medium">Address</th>
                                 <th className="px-4 py-3 text-left font-medium">Role</th>
                                 <th className="px-4 py-3 text-center font-medium">Status</th>
                                 <th className="px-4 py-3 text-left font-medium">Registered</th>
@@ -84,7 +92,7 @@ export default function UsersIndex({ users, flash }: Props) {
                         <tbody className="divide-y">
                             {users.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                                    <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
                                         No users found.
                                     </td>
                                 </tr>
@@ -92,8 +100,18 @@ export default function UsersIndex({ users, flash }: Props) {
                             {users.map((user) => (
                                 <tr key={user.id}
                                     className={`hover:bg-muted/30 ${!user.is_approved ? 'bg-orange-50/60' : ''}`}>
+                                    <td className="px-4 py-3">
+                                        {user.logo_url ? (
+                                            <img src={user.logo_url} alt="logo" className="h-8 w-8 rounded object-contain border" />
+                                        ) : (
+                                            <span className="text-muted-foreground">—</span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-3 font-medium">{user.name}</td>
                                     <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
+                                    <td className="px-4 py-3 text-muted-foreground">{user.company_name ?? '—'}</td>
+                                    <td className="px-4 py-3 text-muted-foreground">{user.mobile ?? '—'}</td>
+                                    <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate" title={user.address ?? ''}>{user.address ?? '—'}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap gap-1">
                                             {user.roles.length > 0 ? (

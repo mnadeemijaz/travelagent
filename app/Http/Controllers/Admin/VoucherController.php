@@ -437,6 +437,11 @@ class VoucherController extends Controller
                 'madina_contact2_phone' => $config->madina_contact2_phone,
                 'contact_name'          => $config->contact_name,
                 'contact_phone'         => $config->contact_phone,
+                // Agent-specific header fields
+                'agent_company_name'    => $voucher->agent?->company_name,
+                'agent_address'         => $voucher->agent?->address,
+                'agent_mobile'          => $voucher->agent?->mobile,
+                'agent_logo_url'        => $voucher->agent?->logo_url,
             ],
         ];
     }
@@ -470,6 +475,8 @@ class VoucherController extends Controller
         $data['logoPath']         = storage_path('app/public/icon.png');
         $data['instructionsPath'] = storage_path('app/public/al_abrar.jpg');
         $data['qrCodeBase64']     = $this->qrCodeBase64($data['voucher']['share_url']);
+        $agentLogo = $voucher->agent?->company_logo;
+        $data['agentLogoPath'] = $agentLogo ? storage_path('app/public/' . $agentLogo) : null;
         $pdf = Pdf::loadView('pdf.voucher', $data)->setPaper('a4', 'portrait');
         return $pdf->download("voucher-{$voucher->id}.pdf");
     }
@@ -480,6 +487,8 @@ class VoucherController extends Controller
         $data['logoPath']         = storage_path('app/public/icon.png');
         $data['instructionsPath'] = storage_path('app/public/al_abrar.jpg');
         $data['qrCodeBase64']     = $this->qrCodeBase64($data['voucher']['share_url']);
+        $agentLogo = $voucher->agent?->company_logo;
+        $data['agentLogoPath'] = $agentLogo ? storage_path('app/public/' . $agentLogo) : null;
         $pdf = Pdf::loadView('pdf.voucher-invoice', $data)->setPaper('a4', 'portrait');
         return $pdf->download("invoice-{$voucher->id}.pdf");
     }

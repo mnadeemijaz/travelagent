@@ -25,7 +25,16 @@ class User extends Authenticatable
         'email',
         'password',
         'is_approved',
+        'company_name',
+        'address',
+        'mobile',
+        'company_logo',
     ];
+
+    public function getLogoUrlAttribute(): string|null
+    {
+        return $this->company_logo ? url('media/' . $this->company_logo) : null;
+    }
 
     /**
      * The attributes that should be hidden for serialization.

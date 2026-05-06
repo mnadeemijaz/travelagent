@@ -17,11 +17,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UsersCreate({ roles }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string; email: string; password: string; role: string;
+        company_name: string; address: string; mobile: string;
+        company_logo: File | null;
+    }>({
         name: '',
         email: '',
         password: '',
         role: '',
+        company_name: '',
+        address: '',
+        mobile: '',
+        company_logo: null,
     });
 
     function submit(e: React.FormEvent) {
@@ -75,6 +83,50 @@ export default function UsersCreate({ roles }: Props) {
                             placeholder="••••••••"
                         />
                         {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="company_logo">Company Logo</Label>
+                        <Input
+                            id="company_logo"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setData('company_logo', e.target.files?.[0] ?? null)}
+                        />
+                        {errors.company_logo && <p className="text-sm text-destructive">{errors.company_logo}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="company_name">Company Name</Label>
+                        <Input
+                            id="company_name"
+                            value={data.company_name}
+                            onChange={(e) => setData('company_name', e.target.value)}
+                            placeholder="Company or agency name"
+                        />
+                        {errors.company_name && <p className="text-sm text-destructive">{errors.company_name}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="mobile">Mobile</Label>
+                        <Input
+                            id="mobile"
+                            value={data.mobile}
+                            onChange={(e) => setData('mobile', e.target.value)}
+                            placeholder="+92 300 0000000"
+                        />
+                        {errors.mobile && <p className="text-sm text-destructive">{errors.mobile}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="address">Address</Label>
+                        <Input
+                            id="address"
+                            value={data.address}
+                            onChange={(e) => setData('address', e.target.value)}
+                            placeholder="Office / home address"
+                        />
+                        {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
                     </div>
 
                     <div className="space-y-1">

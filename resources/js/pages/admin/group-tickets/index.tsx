@@ -1,7 +1,12 @@
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { X } from 'lucide-react';
+import { useState } from 'react';
+import GroupTicketForm, { type GtFormData } from './form';
 
 interface Ticket {
     id: number; category: string; airline: string; from_city: string; to_city: string;
@@ -9,6 +14,7 @@ interface Ticket {
     flight_no: string | null; meal: string; baggage: string | null;
     price: number; seats_available: number; is_active: boolean; bookings_count: number;
 }
+interface Category { id: number; name: string; }
 interface Paginated<T> {
     data: T[];
     links: { url: string | null; label: string; active: boolean }[];
@@ -22,12 +28,87 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function catLabel(c: string) { return c.charAt(0).toUpperCase() + c.slice(1); }
 
+// ── Booking Modal ─────────────────────────────────────────────────────────────
+function BookingModal({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        passengers: '1',
+        contact_phone: '',
+        notes: '',
+    });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        post(`/admin/group-tickets/${ticket.id}/book`, {
+            onSuccess: () => { reset(); onClose(); },
+        });
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+                <div className="flex items-center justify-between border-b px-5 py-4">
+                    <div>
+                        <h3 className="font-semibold text-base">Book Ticket</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                            {ticket.from_city}→{ticket.to_city} · {ticket.airline} · {ticket.dep_date}
+                        </p>
+                    </div>
+                    <button onClick={onClose} className="rounded p-1 hover:bg-gray-100"><X size={16} /></button>
+                </div>
+                <form onSubmit={submit} className="p-5 space-y-4">
+                    <div className="space-y-1">
+                        <Label>Passengers <span className="text-destructive">*</span></Label>
+                        <Input type="number" min="1" value={data.passengers}
+                            onChange={e => setData('passengers', e.target.value)} />
+                        {errors.passengers && <p className="text-xs text-destructive">{errors.passengers}</p>}
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Contact Phone <span className="text-destructive">*</span></Label>
+                        <Input placeholder="+92 300 0000000" value={data.contact_phone}
+                            onChange={e => setData('contact_phone', e.target.value)} />
+                        {errors.contact_phone && <p className="text-xs text-destructive">{errors.contact_phone}</p>}
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Notes</Label>
+                        <Input placeholder="Optional notes…" value={data.notes}
+                            onChange={e => setData('notes', e.target.value)} />
+                        {errors.notes && <p className="text-xs text-destructive">{errors.notes}</p>}
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                        <Button type="submit" disabled={processing} className="bg-teal-600 hover:bg-teal-700">
+                            {processing ? 'Booking…' : 'Confirm Booking'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function GroupTicketsIndex({
     tickets, categories, filters, flash,
 }: {
-    tickets: Paginated<Ticket>; categories: string[];
-    filters: { category?: string }; flash?: { success?: string };
+    tickets: Paginated<Ticket>;
+    categories: Category[];
+    filters: { category?: string };
+    flash?: { success?: string; error?: string };
 }) {
+    const [showCatPanel, setShowCatPanel] = useState(false);
+    const [showAddForm, setShowAddForm]   = useState(false);
+    const [bookingTicket, setBookingTicket] = useState<Ticket | null>(null);
+    const [newCatName, setNewCatName]     = useState('');
+
+    const addForm = useForm<GtFormData>({
+        category: '', airline: '', from_city: '', to_city: '',
+        booking_code: '', dep_date: '', dep_time: '', arr_time: '',
+        flight_no: '', meal: 'no', baggage: '',
+        price: '', seats_available: '', is_active: true,
+    });
+
+    const catNames = categories.map(c => c.name);
+
     function filterCat(cat: string) {
         router.get('/admin/group-tickets', { category: cat }, { preserveState: true, replace: true });
     }
@@ -37,39 +118,130 @@ export default function GroupTicketsIndex({
         router.delete(`/admin/group-tickets/${id}`, { preserveScroll: true });
     }
 
+    function addCategory() {
+        const name = newCatName.trim().toLowerCase();
+        if (!name) return;
+        router.post('/admin/group-ticket-categories', { name }, {
+            preserveScroll: true,
+            onSuccess: () => setNewCatName(''),
+        });
+    }
+
+    function removeCategory(id: number, name: string) {
+        if (!confirm(`Delete category "${name}"?`)) return;
+        router.delete(`/admin/group-ticket-categories/${id}`, { preserveScroll: true });
+    }
+
+    function submitAddForm(e: React.FormEvent) {
+        e.preventDefault();
+        addForm.post('/admin/group-tickets', {
+            preserveScroll: true,
+            onSuccess: () => {
+                addForm.reset();
+                setShowAddForm(false);
+            },
+        });
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Group Tickets" />
             <div className="flex flex-col gap-4 p-6">
-                <div className="flex items-center justify-between">
+
+                {/* Header */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
                     <h1 className="text-2xl font-semibold">Group Tickets</h1>
-                    <div className="flex gap-2">
-                        <Button variant="outline" asChild>
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm"
+                            onClick={() => { setShowCatPanel(v => !v); setShowAddForm(false); }}>
+                            {showCatPanel ? 'Hide Categories' : 'Manage Categories'}
+                        </Button>
+                        <Button variant="outline" size="sm" asChild>
                             <Link href="/admin/group-ticket-bookings">Bookings</Link>
                         </Button>
-                        <Button asChild><Link href="/admin/group-tickets/create">+ Add Ticket</Link></Button>
+                        <Button size="sm"
+                            onClick={() => { setShowAddForm(v => !v); setShowCatPanel(false); }}
+                            className="bg-teal-600 hover:bg-teal-700">
+                            {showAddForm ? '✕ Cancel' : '+ Add Ticket'}
+                        </Button>
                     </div>
                 </div>
 
+                {/* Flash messages */}
                 {flash?.success && (
                     <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">{flash.success}</div>
                 )}
+                {flash?.error && (
+                    <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{flash.error}</div>
+                )}
 
-                {/* Category filter tabs */}
+                {/* ── Category Management Panel ── */}
+                {showCatPanel && (
+                    <div className="rounded-lg border bg-muted/20 p-4">
+                        <h2 className="mb-3 text-sm font-semibold">Categories</h2>
+                        <div className="mb-4 flex flex-wrap gap-2">
+                            {categories.length === 0 && (
+                                <span className="text-xs text-muted-foreground">No categories yet.</span>
+                            )}
+                            {categories.map(c => (
+                                <span key={c.id}
+                                    className="flex items-center gap-1 rounded-full bg-teal-100 px-3 py-1 text-sm text-teal-800 capitalize">
+                                    {c.name}
+                                    <button
+                                        onClick={() => removeCategory(c.id, c.name)}
+                                        className="ml-0.5 rounded-full p-0.5 hover:bg-teal-200"
+                                        title="Delete category">
+                                        <X size={11} />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            <Input
+                                value={newCatName}
+                                onChange={e => setNewCatName(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCategory())}
+                                placeholder="New category name…"
+                                className="w-52"
+                            />
+                            <Button size="sm" onClick={addCategory} className="bg-teal-600 hover:bg-teal-700">
+                                Add
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Inline Add Ticket Form ── */}
+                {showAddForm && (
+                    <div className="rounded-lg border bg-muted/10 p-5">
+                        <h2 className="mb-4 text-base font-semibold">Add New Ticket</h2>
+                        <GroupTicketForm
+                            data={addForm.data}
+                            setData={(key, value) => addForm.setData(key as keyof GtFormData, value as never)}
+                            errors={addForm.errors}
+                            processing={addForm.processing}
+                            categories={catNames}
+                            onSubmit={submitAddForm}
+                            submitLabel="Create Ticket"
+                        />
+                    </div>
+                )}
+
+                {/* ── Category filter tabs ── */}
                 <div className="flex gap-2 flex-wrap">
                     <button onClick={() => filterCat('')}
                         className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${!filters.category ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                         All
                     </button>
                     {categories.map(c => (
-                        <button key={c} onClick={() => filterCat(c)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors ${filters.category === c ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                            {catLabel(c)}
+                        <button key={c.id} onClick={() => filterCat(c.name)}
+                            className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors ${filters.category === c.name ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                            {catLabel(c.name)}
                         </button>
                     ))}
                 </div>
 
-                {/* Table */}
+                {/* ── Tickets Table ── */}
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50 text-muted-foreground">
@@ -106,8 +278,8 @@ export default function GroupTicketsIndex({
                                     </td>
                                     <td className="px-3 py-2">{t.dep_date}</td>
                                     <td className="px-3 py-2 text-xs">
-                                        <div>Dep: {t.dep_time.substring(0,5)}</div>
-                                        <div>Arr: {t.arr_time.substring(0,5)}</div>
+                                        <div>Dep: {t.dep_time.substring(0, 5)}</div>
+                                        <div>Arr: {t.arr_time.substring(0, 5)}</div>
                                     </td>
                                     <td className="px-3 py-2 text-xs">
                                         <div>Meal: {t.meal.toUpperCase()}</div>
@@ -124,11 +296,20 @@ export default function GroupTicketsIndex({
                                         </span>
                                     </td>
                                     <td className="px-3 py-2 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button variant="outline" size="sm" asChild>
+                                        <div className="flex items-center justify-end gap-1.5">
+                                            <Button
+                                                size="sm"
+                                                className="h-7 bg-teal-600 hover:bg-teal-700 text-xs px-2"
+                                                onClick={() => setBookingTicket(t)}>
+                                                Book
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="h-7 text-xs px-2" asChild>
                                                 <Link href={`/admin/group-tickets/${t.id}/edit`}>Edit</Link>
                                             </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => destroy(t.id)}>Delete</Button>
+                                            <Button variant="destructive" size="sm" className="h-7 text-xs px-2"
+                                                onClick={() => destroy(t.id)}>
+                                                Delete
+                                            </Button>
                                         </div>
                                     </td>
                                 </tr>
@@ -137,6 +318,7 @@ export default function GroupTicketsIndex({
                     </table>
                 </div>
 
+                {/* Pagination */}
                 {tickets.last_page > 1 && (
                     <div className="flex flex-wrap gap-1">
                         {tickets.links.map((link, i) => (
@@ -148,6 +330,11 @@ export default function GroupTicketsIndex({
                     </div>
                 )}
             </div>
+
+            {/* ── Booking Modal ── */}
+            {bookingTicket && (
+                <BookingModal ticket={bookingTicket} onClose={() => setBookingTicket(null)} />
+            )}
         </AppLayout>
     );
 }

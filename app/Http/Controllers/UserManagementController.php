@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -21,12 +23,16 @@ class UserManagementController extends Controller
             ->orderBy('id')
             ->get()
             ->map(fn (User $user) => [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'email'       => $user->email,
-                'roles'       => $user->roles->pluck('name'),
-                'is_approved' => $user->is_approved,
-                'created_at'  => $user->created_at->toDateString(),
+                'id'           => $user->id,
+                'name'         => $user->name,
+                'email'        => $user->email,
+                'roles'        => $user->roles->pluck('name'),
+                'is_approved'  => $user->is_approved,
+                'created_at'   => $user->created_at->toDateString(),
+                'company_name' => $user->company_name,
+                'address'      => $user->address,
+                'mobile'       => $user->mobile,
+                'logo_url'     => $user->logo_url,
             ]);
 
         return Inertia::render('users/index', [
@@ -45,17 +51,36 @@ class UserManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', Password::defaults()],
-            'role'     => ['required', 'string', Rule::exists('roles', 'name')],
+            'name'         => ['required', 'string', 'max:255'],
+            'email'        => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'     => ['required', Password::defaults()],
+            'role'         => ['required', 'string', Rule::exists('roles', 'name')],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'address'      => ['nullable', 'string', 'max:1000'],
+            'mobile'       => ['nullable', 'string', 'max:50'],
+            'company_logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
+        $logoPath = null;
+        if ($request->hasFile('company_logo')) {
+            $file      = $request->file('company_logo');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'logos');
+            if (!is_dir($savePath)) mkdir($savePath, 0755, true);
+            $file->move($savePath, $filename);
+            $logoPath = 'logos/' . $filename;
+        }
+
         $user = User::create([
-            'name'        => $validated['name'],
-            'email'       => $validated['email'],
-            'password'    => Hash::make($validated['password']),
-            'is_approved' => true,   // admin-created users are auto-approved
+            'name'         => $validated['name'],
+            'email'        => $validated['email'],
+            'password'     => Hash::make($validated['password']),
+            'is_approved'  => true,   // admin-created users are auto-approved
+            'company_name' => $validated['company_name'] ?? null,
+            'address'      => $validated['address'] ?? null,
+            'mobile'       => $validated['mobile'] ?? null,
+            'company_logo' => $logoPath,
         ]);
 
         $user->assignRole($validated['role']);
@@ -67,10 +92,14 @@ class UserManagementController extends Controller
     {
         return Inertia::render('users/edit', [
             'user'  => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'role'  => $user->roles->first()?->name,
+                'id'           => $user->id,
+                'name'         => $user->name,
+                'email'        => $user->email,
+                'role'         => $user->roles->first()?->name,
+                'company_name' => $user->company_name,
+                'address'      => $user->address,
+                'mobile'       => $user->mobile,
+                'logo_url'     => $user->logo_url,
             ],
             'roles' => Role::orderBy('name')->pluck('name'),
         ]);
@@ -79,17 +108,38 @@ class UserManagementController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', Password::defaults()],
-            'role'     => ['required', 'string', Rule::exists('roles', 'name')],
+            'name'         => ['required', 'string', 'max:255'],
+            'email'        => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'password'     => ['nullable', Password::defaults()],
+            'role'         => ['required', 'string', Rule::exists('roles', 'name')],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'address'      => ['nullable', 'string', 'max:1000'],
+            'mobile'       => ['nullable', 'string', 'max:50'],
+            'company_logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $user->update([
-            'name'  => $validated['name'],
-            'email' => $validated['email'],
+        if ($request->hasFile('company_logo')) {
+            if ($user->company_logo) {
+                Storage::disk('public')->delete($user->company_logo);
+            }
+            $file      = $request->file('company_logo');
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename  = Str::random(40) . '.' . $extension;
+            $savePath  = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'logos');
+            if (!is_dir($savePath)) mkdir($savePath, 0755, true);
+            $file->move($savePath, $filename);
+            $user->company_logo = 'logos/' . $filename;
+        }
+
+        $user->fill([
+            'name'         => $validated['name'],
+            'email'        => $validated['email'],
+            'company_name' => $validated['company_name'] ?? null,
+            'address'      => $validated['address'] ?? null,
+            'mobile'       => $validated['mobile'] ?? null,
             ...($validated['password'] ? ['password' => Hash::make($validated['password'])] : []),
         ]);
+        $user->save();
 
         $user->syncRoles([$validated['role']]);
 

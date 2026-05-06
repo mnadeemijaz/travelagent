@@ -352,7 +352,7 @@ function BookingModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const CAT_LABELS: Record<string, string> = {
-    umrah: 'Umrah', visit: 'Visit', hajj: 'Hajj', tour: 'Tour', other: 'Other',
+    umrah: 'Umrah', visit: 'KSA One Way Groups', hajj: 'UAE One Way Groups', tour: 'UK One Way Groups', '': 'All Type',
 };
 
 export default function GroupTicketsPage({

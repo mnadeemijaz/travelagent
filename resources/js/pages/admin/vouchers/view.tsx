@@ -68,6 +68,8 @@ interface Props {
         madina_contact1_name: string | null; madina_contact1_phone: string | null;
         madina_contact2_name: string | null; madina_contact2_phone: string | null;
         contact_name: string | null; contact_phone: string | null;
+        agent_company_name: string | null; agent_address: string | null;
+        agent_mobile: string | null; agent_logo_url: string | null;
     };
 }
 
@@ -153,17 +155,19 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                         <tbody>
                             <tr>
                                 <td className="w-1/4 align-bottom">
-                                    <img
-                                        src="/storage/icon.png"
-                                        alt="Company Logo"
-                                        className="h-16 object-contain"
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                    />
+                                    {company.agent_logo_url ? (
+                                        <img
+                                            src={company.agent_logo_url}
+                                            alt="Company Logo"
+                                            className="h-16 object-contain"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        />
+                                    ) : null}
                                 </td>
                                 <td className="text-center">
-                                    <h2 className="text-lg font-bold m-0">{company.name}</h2>
-                                    <p className="text-xs text-gray-600 m-0">{company.address}</p>
-                                    <p className="text-xs text-gray-600 m-0">{company.phone} | {company.email}</p>
+                                    <h2 className="text-lg font-bold m-0">{company.agent_company_name}</h2>
+                                    {company.agent_address && <p className="text-xs text-gray-600 m-0">{company.agent_address}</p>}
+                                    {company.agent_mobile && <p className="text-xs text-gray-600 m-0">{company.agent_mobile}</p>}
                                 </td>
                                 <td className="w-1/4 text-right align-top text-xs text-gray-600">
                                     <div className="flex flex-col items-end gap-1">
@@ -174,7 +178,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                                             includeMargin={false}
                                         />
                                         <span className="text-[10px] text-gray-500">Scan to verify</span>
-                                        <span>Agent: {voucher.agent_name}</span>
+                                        {/* <span>Agent: {voucher.agent_name}</span> */}
                                     </div>
                                 </td>
                             </tr>

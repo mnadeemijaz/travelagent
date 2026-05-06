@@ -195,6 +195,9 @@ Route::middleware(['auth'])->group(function () {
 
             // ── Group Tickets ──────────────────────────────────────────────────────
             Route::resource('group-tickets', GroupTicketController::class)->except(['show']);
+            Route::post('group-tickets/{groupTicket}/book',        [GroupTicketController::class, 'bookAdmin'])->name('group-tickets.book');
+            Route::post('group-ticket-categories',                 [GroupTicketController::class, 'storeCategory'])->name('group-ticket-categories.store');
+            Route::delete('group-ticket-categories/{groupTicketCategory}', [GroupTicketController::class, 'destroyCategory'])->name('group-ticket-categories.destroy');
             Route::post('group-ticket-bookings/{booking}/approve', [GroupTicketController::class, 'approveBooking'])->name('group-ticket-bookings.approve');
             Route::post('group-ticket-bookings/{booking}/reject',  [GroupTicketController::class, 'rejectBooking'])->name('group-ticket-bookings.reject');
 

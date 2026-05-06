@@ -32,19 +32,23 @@
 <table class="header-table" style="margin-bottom:6px">
     <tr>
         <td style="width:20%">
-            @if(file_exists($logoPath))
-            <img src="{{ $logoPath }}" alt="Logo" class="logo">
+            @if(!empty($agentLogoPath) && file_exists($agentLogoPath))
+            <img src="{{ $agentLogoPath }}" alt="Logo" class="logo">
             @endif
         </td>
         <td style="text-align:center">
-            <div style="font-size:15px;font-weight:bold">{{ $company['name'] }}</div>
-            <div style="font-size:10px;color:#555">{{ $company['address'] }}</div>
-            <div style="font-size:10px;color:#555">{{ $company['phone'] }} | {{ $company['email'] }}</div>
+            <div style="font-size:15px;font-weight:bold">{{ $company['agent_company_name'] }}</div>
+            @if(!empty($company['agent_address']))
+            <div style="font-size:10px;color:#555">{{ $company['agent_address'] }}</div>
+            @endif
+            @if(!empty($company['agent_mobile']))
+            <div style="font-size:10px;color:#555">{{ $company['agent_mobile'] }}</div>
+            @endif
         </td>
         <td style="width:20%;text-align:right;vertical-align:top">
             <img src="{{ $qrCodeBase64 }}" alt="QR" style="width:72px;height:72px;display:block;margin-left:auto">
             <div style="font-size:9px;color:#888;text-align:right;margin-top:2px">Scan to verify</div>
-            <div style="font-size:10px;color:#555;text-align:right;margin-top:2px">Agent: {{ $voucher['agent_name'] }}</div>
+            {{-- <div style="font-size:10px;color:#555;text-align:right;margin-top:2px">Agent: {{ $voucher['agent_name'] }}</div> --}}
         </td>
     </tr>
 </table>

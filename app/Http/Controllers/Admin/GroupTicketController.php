@@ -5,15 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GroupTicket;
 use App\Models\GroupTicketBooking;
+use App\Models\GroupTicketCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class GroupTicketController extends Controller
 {
-    private const CATEGORIES = ['umrah', 'visit', 'hajj', 'tour', 'other'];
-
     // ── Tickets CRUD ───────────────────────────────────────────────────────────
 
     public function index(Request $request): Response
@@ -26,16 +26,16 @@ class GroupTicketController extends Controller
 
         return Inertia::render('admin/group-tickets/index', [
             'tickets'    => $query->withCount('bookings')->orderByDesc('id')->paginate(25)->withQueryString(),
-            'categories' => self::CATEGORIES,
+            'categories' => GroupTicketCategory::orderBy('name')->get(['id', 'name']),
             'filters'    => $request->only(['category']),
-            'flash'      => session()->only(['success']),
+            'flash'      => session()->only(['success', 'error']),
         ]);
     }
 
     public function create(): Response
     {
         return Inertia::render('admin/group-tickets/create', [
-            'categories' => self::CATEGORIES,
+            'categories' => GroupTicketCategory::orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -67,7 +67,7 @@ class GroupTicketController extends Controller
     {
         return Inertia::render('admin/group-tickets/edit', [
             'ticket'     => $groupTicket,
-            'categories' => self::CATEGORIES,
+            'categories' => GroupTicketCategory::orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -101,6 +101,34 @@ class GroupTicketController extends Controller
         return back()->with('success', 'Group ticket deleted.');
     }
 
+    // ── Category Management ────────────────────────────────────────────────────
+
+    public function storeCategory(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:50', 'unique:group_ticket_categories,name'],
+        ]);
+
+        GroupTicketCategory::create(['name' => strtolower(trim($request->name))]);
+
+        return back()->with('success', "Category '{$request->name}' added.");
+    }
+
+    public function destroyCategory(GroupTicketCategory $groupTicketCategory): RedirectResponse
+    {
+        $inUse = GroupTicket::where('isDeleted', 0)
+            ->where('category', $groupTicketCategory->name)
+            ->exists();
+
+        if ($inUse) {
+            return back()->with('error', "Cannot delete '{$groupTicketCategory->name}' — it has active tickets.");
+        }
+
+        $groupTicketCategory->delete();
+
+        return back()->with('success', "Category '{$groupTicketCategory->name}' deleted.");
+    }
+
     // ── Bookings management ────────────────────────────────────────────────────
 
     public function bookings(Request $request): Response
@@ -110,7 +138,6 @@ class GroupTicketController extends Controller
 
         $query = GroupTicketBooking::with(['ticket', 'user']);
 
-        // Non-admin users see only their own bookings
         if (! $isAdmin) {
             $query->where('user_id', $user->id);
         }
@@ -125,7 +152,7 @@ class GroupTicketController extends Controller
 
         return Inertia::render('admin/group-tickets/bookings', [
             'bookings'   => $query->orderByDesc('id')->paginate(25)->withQueryString(),
-            'categories' => self::CATEGORIES,
+            'categories' => GroupTicketCategory::orderBy('name')->pluck('name'),
             'filters'    => $request->only(['status', 'category']),
             'flash'      => session()->only(['success']),
             'isAdmin'    => $isAdmin,
@@ -146,5 +173,41 @@ class GroupTicketController extends Controller
     {
         $booking->update(['status' => 'rejected']);
         return back()->with('success', 'Booking rejected.');
+    }
+
+    // ── Admin booking (inline) ─────────────────────────────────────────────────
+
+    public function bookAdmin(Request $request, GroupTicket $groupTicket): RedirectResponse
+    {
+        $validated = $request->validate([
+            'passengers'    => ['required', 'integer', 'min:1'],
+            'contact_phone' => ['required', 'string', 'max:30'],
+            'notes'         => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $booked = GroupTicketBooking::where('group_ticket_id', $groupTicket->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->sum('passengers');
+
+        $remaining = $groupTicket->seats_available - (int) $booked;
+
+        if ($validated['passengers'] > $remaining) {
+            throw ValidationException::withMessages([
+                'passengers' => "Only {$remaining} seat(s) remaining.",
+            ]);
+        }
+
+        GroupTicketBooking::create([
+            'group_ticket_id' => $groupTicket->id,
+            'user_id'         => auth()->id(),
+            'passengers'      => $validated['passengers'],
+            'contact_phone'   => $validated['contact_phone'],
+            'notes'           => $validated['notes'] ?? null,
+            'status'          => 'pending',
+            'expires_at'      => now()->addHour(),
+        ]);
+
+        return back()->with('success', 'Booking created successfully.');
     }
 }

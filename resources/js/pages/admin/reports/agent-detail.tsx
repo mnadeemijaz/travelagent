@@ -247,7 +247,7 @@ export default function AgentDetailReport({
                     <h2 className="mb-3 text-base font-semibold text-purple-700">
                         Ticket Sales
                         <span className="ml-2 text-sm font-normal text-muted-foreground">
-                            Sale: PKR {fmt(totalTicketSale)} / Purchase: PKR {fmt(totalTicketPurchase)}
+                            {/* Sale: PKR {fmt(totalTicketSale)} / Purchase: PKR {fmt(totalTicketPurchase)} */}
                         </span>
                     </h2>
                     <div className="overflow-x-auto rounded-lg border">
@@ -261,9 +261,9 @@ export default function AgentDetailReport({
                                     <th className="px-3 py-2 text-left font-medium">PNR</th>
                                     <th className="px-3 py-2 text-left font-medium">Route</th>
                                     <th className="px-3 py-2 text-left font-medium">Flight</th>
-                                    <th className="px-3 py-2 text-right font-medium">Purchase</th>
+                                    {/* <th className="px-3 py-2 text-right font-medium">Purchase</th> */}
                                     <th className="px-3 py-2 text-right font-medium">Sale</th>
-                                    <th className="px-3 py-2 text-right font-medium">Profit</th>
+                                    {/* <th className="px-3 py-2 text-right font-medium">Profit</th> */}
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -281,11 +281,11 @@ export default function AgentDetailReport({
                                             <td className="px-3 py-2">{t.pnr}</td>
                                             <td className="px-3 py-2">{t.ticket_from_to}</td>
                                             <td className="px-3 py-2">{t.flight_name ?? '—'}</td>
-                                            <td className="px-3 py-2 text-right">{fmt(t.purchase)}</td>
+                                            {/* <td className="px-3 py-2 text-right">{fmt(t.purchase)}</td> */}
                                             <td className="px-3 py-2 text-right">{fmt(t.sale)}</td>
-                                            <td className={`px-3 py-2 text-right font-semibold ${profit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                            {/* <td className={`px-3 py-2 text-right font-semibold ${profit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                                 {profit < 0 ? '−' : ''}{fmt(Math.abs(profit))}
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     );
                                 })}
@@ -294,11 +294,11 @@ export default function AgentDetailReport({
                                 <tfoot className="bg-muted/50 font-semibold">
                                     <tr>
                                         <td colSpan={7} className="px-3 py-2">Totals</td>
-                                        <td className="px-3 py-2 text-right">{fmt(totalTicketPurchase)}</td>
+                                        {/* <td className="px-3 py-2 text-right">{fmt(totalTicketPurchase)}</td> */}
                                         <td className="px-3 py-2 text-right text-purple-700">{fmt(totalTicketSale)}</td>
-                                        <td className={`px-3 py-2 text-right ${totalTicketSale - totalTicketPurchase >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                        {/* <td className={`px-3 py-2 text-right ${totalTicketSale - totalTicketPurchase >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                             {fmt(totalTicketSale - totalTicketPurchase)}
-                                        </td>
+                                        </td> */}
                                     </tr>
                                     <tr className="bg-red-50 text-red-700">
                                         <td colSpan={9} className="px-3 py-1.5 text-sm">

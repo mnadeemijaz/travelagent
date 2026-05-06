@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GroupTicket;
 use App\Models\GroupTicketBooking;
+use App\Models\GroupTicketCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -12,7 +13,6 @@ use Inertia\Response;
 
 class GroupTicketPublicController extends Controller
 {
-    private const CATEGORIES = ['umrah', 'visit', 'hajj', 'tour', 'other'];
 
     public function index(Request $request): Response
     {
@@ -37,7 +37,7 @@ class GroupTicketPublicController extends Controller
 
         return Inertia::render('group-tickets', [
             'tickets'        => $tickets,
-            'categories'     => self::CATEGORIES,
+            'categories'     => GroupTicketCategory::orderBy('name')->pluck('name'),
             'activeCategory' => $category,
         ]);
     }

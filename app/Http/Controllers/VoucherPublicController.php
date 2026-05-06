@@ -92,6 +92,10 @@ class VoucherPublicController extends Controller
                 'madina_contact2_phone' => $config->madina_contact2_phone,
                 'contact_name'          => $config->contact_name,
                 'contact_phone'         => $config->contact_phone,
+                'agent_company_name'    => $voucher->agent?->company_name,
+                'agent_address'         => $voucher->agent?->address,
+                'agent_mobile'          => $voucher->agent?->mobile,
+                'agent_logo_url'        => $voucher->agent?->logo_url,
             ],
         ]);
     }
