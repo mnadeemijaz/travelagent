@@ -16,12 +16,16 @@ class GroupTicketPublicController extends Controller
 
     public function index(Request $request): Response
     {
-        $category = $request->input('category', 'umrah');
+        $category = $request->input('category', '');
 
-        $tickets = GroupTicket::where('isDeleted', 0)
-            ->where('is_active', true)
-            ->where('category', $category)
-            ->withSum(
+        $query = GroupTicket::where('isDeleted', 0)
+            ->where('is_active', true);
+
+        if ($category !== '') {
+            $query->where('category', $category);
+        }
+
+        $tickets = $query->withSum(
                 ['bookings as booked_seats' => fn ($q) => $q->whereIn('status', ['pending', 'approved'])
                     ->where(fn ($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))],
                 'passengers'

@@ -373,7 +373,8 @@ export default function GroupTicketsPage({
     const navLinks = ['Home', 'About', 'Destinations', 'Packages', 'Services', 'Contact'];
 
     function selectCategory(cat: string) {
-        router.get('/group-tickets', { category: cat }, { preserveState: true, replace: true });
+        const params = cat ? { category: cat } : {};
+        router.get('/group-tickets', params, { preserveState: true, replace: true });
     }
 
     function handleBookNow(ticket: Ticket) {
@@ -515,6 +516,14 @@ export default function GroupTicketsPage({
             <div className="sticky top-[65px] z-40 bg-white border-b shadow-sm">
                 <div className="mx-auto max-w-7xl px-4 md:px-6">
                     <div className="flex gap-1 overflow-x-auto py-3 scrollbar-none">
+                        {/* All Type tab */}
+                        <button onClick={() => selectCategory('')}
+                            className={`shrink-0 rounded-full px-5 py-2 text-sm font-semibold transition-colors
+                                ${activeCategory === ''
+                                    ? 'bg-teal-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-teal-50 hover:text-teal-700'}`}>
+                            All Type
+                        </button>
                         {categories.map(cat => (
                             <button key={cat} onClick={() => selectCategory(cat)}
                                 className={`shrink-0 rounded-full px-5 py-2 text-sm font-semibold capitalize transition-colors
