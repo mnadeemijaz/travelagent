@@ -35,9 +35,15 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pilgrim Report" />
             <div className="flex flex-col gap-4 p-6">
-                <h1 className="text-2xl font-semibold">Pilgrim Report</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold">Pilgrim Report</h1>
+                    <button onClick={() => window.print()}
+                        className="no-print rounded-md bg-gray-700 px-3 py-1.5 text-sm text-white hover:bg-gray-800">
+                        🖨 Print
+                    </button>
+                </div>
 
-                <form onSubmit={search} className="flex flex-wrap items-end gap-3">
+                <form onSubmit={search} className="no-print flex flex-wrap items-end gap-3">
                     <input value={data.searchText} onChange={e => setData('searchText', e.target.value)}
                         placeholder="Search name / PP no…"
                         className="rounded-md border border-input bg-background px-3 py-2 text-sm w-48" />
@@ -103,12 +109,12 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="no-print flex items-center justify-between text-xs text-muted-foreground">
                     <span>Total on page: {records.data.length} | Page {records.current_page} of {records.last_page}</span>
                 </div>
 
                 {records.last_page > 1 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="no-print flex flex-wrap gap-1">
                         {records.links.map((link, i) => (
                             <button key={i} disabled={!link.url}
                                 onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
@@ -118,6 +124,15 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
                     </div>
                 )}
             </div>
+
+            <style>{`
+                @media print {
+                    aside, header { display: none !important; }
+                    .no-print { display: none !important; }
+                    main { max-width: 100% !important; }
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+            `}</style>
         </AppLayout>
     );
 }

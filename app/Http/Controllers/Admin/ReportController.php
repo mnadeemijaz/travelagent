@@ -192,6 +192,31 @@ class ReportController extends Controller
             GROUP BY c.agent_id, v.sr_rate
         ", [$agentId]);
 
+        // Bank DR transactions
+        $bankDrTransactions = DB::select("
+            SELECT bt.id, bt.date,
+                CASE WHEN bt.detail != '' THEN CONCAT('[Bank] ', bt.detail) ELSE '[Bank Transaction]' END AS detail,
+                bt.amount, NULL AS voucher_id,
+                0 AS t_adult, 0 AS t_child, 0 AS t_infant
+            FROM bank_transection bt
+            WHERE bt.isDeleted = 0
+              AND bt.payment_type = 'dr'
+              AND bt.agent_id = ?
+            ORDER BY bt.id DESC
+        ", [$agentId]);
+
+        // Bank CR transactions
+        $bankCrTransactions = DB::select("
+            SELECT bt.id, bt.date,
+                CASE WHEN bt.detail != '' THEN CONCAT('[Bank] ', bt.detail) ELSE '[Bank Transaction]' END AS detail,
+                bt.amount, NULL AS voucher_id
+            FROM bank_transection bt
+            WHERE bt.isDeleted = 0
+              AND bt.payment_type = 'cr'
+              AND bt.agent_id = ?
+            ORDER BY bt.id DESC
+        ", [$agentId]);
+
         // Ticket sales
         $ticketSales = DB::select("
             SELECT ts.id, ts.date, ts.name, ts.ticket_no, ts.pnr,
@@ -205,18 +230,23 @@ class ReportController extends Controller
             ORDER BY ts.id DESC
         ", [$agentId]);
 
-        $totalCr = array_sum(array_column($crTransactions, 'amount'));
-        $totalDr = array_sum(array_column($drTransactions, 'amount'));
+        $allCrTransactions = array_merge($crTransactions, $bankCrTransactions);
+        $allDrTransactions = array_merge($drTransactions, $bankDrTransactions);
+
+        $ticketSaleTotal = array_sum(array_column($ticketSales, 'sale'));
+        $totalCr = array_sum(array_column($allCrTransactions, 'amount'));
+        $totalDr = array_sum(array_column($allDrTransactions, 'amount'));
 
         return Inertia::render('admin/reports/agent-detail', [
             'agent'           => ['id' => $agent->id, 'name' => $agent->name],
-            'drTransactions'  => $drTransactions,
-            'crTransactions'  => $crTransactions,
+            'drTransactions'  => $allDrTransactions,
+            'crTransactions'  => $allCrTransactions,
             'chargesWoVoucher'=> $chargesWoVoucher,
             'ticketSales'     => $ticketSales,
             'totalCr'         => $totalCr,
             'totalDr'         => $totalDr,
-            'balance'         => $totalCr - $totalDr,
+            'ticketSaleTotal' => $ticketSaleTotal,
+            'balance'         => $totalCr - $totalDr - $ticketSaleTotal,
         ]);
     }
 
@@ -224,23 +254,34 @@ class ReportController extends Controller
 
     public function agentBalanceReport(): Response
     {
-        // Per-agent: transaction CR/DR, ticket sale total, approved-pending clients
+        // Per-agent: transactions + bank_transection CR/DR, ticket sale total, approved-pending clients
         $agentRows = DB::select("
             SELECT
                 u.id,
                 u.name,
-                COALESCE(SUM(CASE WHEN t.payment_type = 'cr' THEN t.amount ELSE 0 END), 0) AS credit_total,
-                COALESCE(SUM(CASE WHEN t.payment_type = 'dr' THEN t.amount ELSE 0 END), 0) AS debit_total,
-                COALESCE(ts.sale_amount, 0)  AS sale_amount,
-                COALESCE(c.t_adult, 0)       AS t_adult,
-                COALESCE(c.t_child, 0)       AS t_child,
-                COALESCE(c.t_infant, 0)      AS t_infant,
+                COALESCE(SUM(CASE WHEN t.payment_type = 'cr' THEN t.amount ELSE 0 END), 0)
+                    + COALESCE(bt.bt_credit, 0)                AS credit_total,
+                COALESCE(SUM(CASE WHEN t.payment_type = 'dr' THEN t.amount ELSE 0 END), 0)
+                    + COALESCE(bt.bt_debit, 0)
+                    + COALESCE(ts.sale_amount, 0)              AS debit_total,
+                COALESCE(ts.sale_amount, 0)                    AS sale_amount,
+                COALESCE(c.t_adult, 0)                         AS t_adult,
+                COALESCE(c.t_child, 0)                         AS t_child,
+                COALESCE(c.t_infant, 0)                        AS t_infant,
                 v.sr_rate
             FROM users u
             INNER JOIN model_has_roles mhr ON mhr.model_id = u.id
                 AND mhr.model_type = 'App\\\\Models\\\\User'
             INNER JOIN roles r ON r.id = mhr.role_id AND r.name = 'agent'
             LEFT JOIN transactions t ON t.account_id = u.id AND t.isDeleted = 0
+            LEFT JOIN (
+                SELECT agent_id,
+                    SUM(CASE WHEN payment_type = 'cr' THEN amount ELSE 0 END) AS bt_credit,
+                    SUM(CASE WHEN payment_type = 'dr' THEN amount ELSE 0 END) AS bt_debit
+                FROM bank_transection
+                WHERE isDeleted = 0
+                GROUP BY agent_id
+            ) bt ON bt.agent_id = u.id
             LEFT JOIN (
                 SELECT agent_id, SUM(sale) AS sale_amount
                 FROM ticket_sale
@@ -263,7 +304,7 @@ class ReportController extends Controller
                     SELECT MAX(v2.id) FROM vouchers v2
                     WHERE v2.agent_id = u.id AND v2.isDeleted = 0
                 )
-            GROUP BY u.id, u.name, ts.sale_amount, c.t_adult, c.t_child, c.t_infant, v.sr_rate
+            GROUP BY u.id, u.name, bt.bt_credit, bt.bt_debit, ts.sale_amount, c.t_adult, c.t_child, c.t_infant, v.sr_rate
             ORDER BY u.name
         ");
 

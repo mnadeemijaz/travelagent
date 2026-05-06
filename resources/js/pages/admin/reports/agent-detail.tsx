@@ -35,14 +35,14 @@ function fmt(n: number | null | undefined) {
 
 export default function AgentDetailReport({
     agent, drTransactions, crTransactions, chargesWoVoucher,
-    ticketSales, totalCr, totalDr, balance,
+    ticketSales, totalCr, totalDr, ticketSaleTotal, balance,
 }: {
     agent: Agent;
     drTransactions: DrTransaction[];
     crTransactions: CrTransaction[];
     chargesWoVoucher: ChargeWoVoucher[];
     ticketSales: TicketSale[];
-    totalCr: number; totalDr: number; balance: number;
+    totalCr: number; totalDr: number; ticketSaleTotal: number; balance: number;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
@@ -59,16 +59,23 @@ export default function AgentDetailReport({
             <div className="flex flex-col gap-8 p-6">
 
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between no-print">
                     <div>
                         <h1 className="text-2xl font-semibold">{agent.name}</h1>
                         <p className="text-sm text-muted-foreground mt-0.5">Account Transaction Detail</p>
                     </div>
-                    <Link href="/admin/reports/agent-balance"
-                        className="text-sm text-teal-700 hover:underline">
-                        ← Back to Agent Balance
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => window.print()}
+                            className="rounded-md bg-gray-700 px-3 py-1.5 text-sm text-white hover:bg-gray-800">
+                            🖨 Print
+                        </button>
+                        <Link href="/admin/reports/agent-balance"
+                            className="text-sm text-teal-700 hover:underline">
+                            ← Back to Agent Balance
+                        </Link>
+                    </div>
                 </div>
+                <div className="print-only hidden print:block text-xl font-bold mb-2">{agent.name} — Account Detail</div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-3 gap-4">
@@ -78,7 +85,12 @@ export default function AgentDetailReport({
                     </div>
                     <div className="rounded-lg border bg-red-50 p-4 text-center">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Debit (DR)</p>
-                        <p className="mt-1 text-xl font-bold text-red-700">PKR {fmt(totalDr)}</p>
+                        <p className="mt-1 text-xl font-bold text-red-700">PKR {fmt(totalDr + ticketSaleTotal)}</p>
+                        {ticketSaleTotal > 0 && (
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                Txn: {fmt(totalDr)} + Tickets: {fmt(ticketSaleTotal)}
+                            </p>
+                        )}
                     </div>
                     <div className={`rounded-lg border p-4 text-center ${balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">Balance</p>
@@ -288,6 +300,11 @@ export default function AgentDetailReport({
                                             {fmt(totalTicketSale - totalTicketPurchase)}
                                         </td>
                                     </tr>
+                                    <tr className="bg-red-50 text-red-700">
+                                        <td colSpan={9} className="px-3 py-1.5 text-sm">
+                                            Ticket Sales counted as DR: PKR {fmt(totalTicketSale)}
+                                        </td>
+                                    </tr>
                                 </tfoot>
                             )}
                         </table>
@@ -295,6 +312,15 @@ export default function AgentDetailReport({
                 </section>
 
             </div>
+
+            <style>{`
+                @media print {
+                    aside, header { display: none !important; }
+                    .no-print { display: none !important; }
+                    main { max-width: 100% !important; }
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+            `}</style>
         </AppLayout>
     );
 }

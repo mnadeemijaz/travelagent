@@ -46,7 +46,13 @@ export default function AgentBalanceReport({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Agent Balance Report" />
             <div className="flex flex-col gap-8 p-6">
-                <h1 className="text-2xl font-semibold">Agent Balance Report</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold">Agent Balance Report</h1>
+                    <button onClick={() => window.print()}
+                        className="no-print rounded-md bg-gray-700 px-3 py-1.5 text-sm text-white hover:bg-gray-800">
+                        🖨 Print
+                    </button>
+                </div>
 
                 {/* ── Agent Balance Table ─────────────────────────────────── */}
                 <section>
@@ -187,6 +193,15 @@ export default function AgentBalanceReport({
                     </div>
                 </section>
             </div>
+
+            <style>{`
+                @media print {
+                    aside, header { display: none !important; }
+                    .no-print { display: none !important; }
+                    main { max-width: 100% !important; }
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+            `}</style>
         </AppLayout>
     );
 }
