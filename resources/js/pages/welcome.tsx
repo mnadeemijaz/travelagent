@@ -1043,7 +1043,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     key={h.id}
                                     className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                                 >
-                                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                                    <div className="relative aspect-square overflow-hidden bg-gray-200">
                                         {h.image_url ? (
                                             <img
                                                 src={h.image_url}
