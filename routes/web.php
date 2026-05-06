@@ -98,6 +98,10 @@ Route::middleware(['auth'])->group(function () {
 
         // Group ticket bookings — all roles see their own bookings; admin sees all
         Route::get('group-ticket-bookings', [GroupTicketController::class, 'bookings'])->name('group-ticket-bookings.index');
+
+        // Agent balance report — agents see only their own data (enforced in controller)
+        Route::get('reports/agent-balance',           [ReportController::class, 'agentBalanceReport'])->name('reports.agent-balance');
+        Route::get('reports/agent-balance/{agentId}', [ReportController::class, 'agentDetail'])->name('reports.agent-detail');
     });
 
     // ── Admin-only routes (agents get 403) ────────────────────────────────────
@@ -212,8 +216,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('reports/departure',     [ReportController::class, 'departureReport'])->name('reports.departure');
             Route::get('reports/visa',          [ReportController::class, 'visaReport'])->name('reports.visa');
             Route::get('reports/pilgrim-wise',   [ReportController::class, 'pilgrimWiseReport'])->name('reports.pilgrim-wise');
-            Route::get('reports/agent-balance',            [ReportController::class, 'agentBalanceReport'])->name('reports.agent-balance');
-            Route::get('reports/agent-balance/{agentId}',  [ReportController::class, 'agentDetail'])->name('reports.agent-detail');
+            // agent-balance routes moved to shared auth group (agents can access their own data)
 
             // ── Transactions ──────────────────────────────────────────────────
             Route::get('transactions/balance', [TransactionController::class, 'balance'])->name('transactions.balance');

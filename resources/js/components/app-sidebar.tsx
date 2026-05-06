@@ -31,9 +31,10 @@ const allMainNavItems: NavItem[] = [
 ];
 
 const agentNavItems: NavItem[] = [
-    { title: 'Client Management', url: '/admin/clients',             icon: BadgeCheck },
-    { title: 'Vouchers',          url: '/admin/vouchers',            icon: ScrollText },
+    { title: 'Client Management', url: '/admin/clients',               icon: BadgeCheck },
+    { title: 'Vouchers',          url: '/admin/vouchers',              icon: ScrollText },
     { title: 'Group Bookings',    url: '/admin/group-ticket-bookings', icon: Ticket },
+    { title: 'Agent Balance',     url: '/admin/reports/agent-balance', icon: BarChart2 },
 ];
 
 const reportNavItems: NavItem[] = [

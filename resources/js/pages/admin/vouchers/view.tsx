@@ -196,7 +196,7 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                     </div>
                     <div className="flex justify-between px-3 py-0.5 text-xs text-gray-600 border-b border-gray-300 mb-0">
                         <span>Group Head Phone: {voucher.gp_hd_no ?? '—'}</span>
-                        <span>Party: {voucher.agent_name}</span>
+                        {/* <span>Party: {voucher.agent_name}</span> */}
                     </div>
 
                     {/* General Information */}

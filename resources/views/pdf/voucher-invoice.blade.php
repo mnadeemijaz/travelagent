@@ -66,7 +66,7 @@
     </tr>
     <tr>
         <td style="border:none;font-size:10px;color:#555">Group Head Phone: {{ $voucher['gp_hd_no'] ?? '—' }}</td>
-        <td style="border:none;font-size:10px;color:#555;text-align:right">Party: {{ $voucher['agent_name'] }}</td>
+        {{-- <td style="border:none;font-size:10px;color:#555;text-align:right">Party: {{ $voucher['agent_name'] }}</td> --}}
     </tr>
 </table>
 

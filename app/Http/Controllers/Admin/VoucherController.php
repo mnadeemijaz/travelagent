@@ -330,7 +330,10 @@ class VoucherController extends Controller
 
     public function destroy(Voucher $voucher): RedirectResponse
     {
-        $voucher->clients()->each(fn($c) => $c->update(['voucher_issue' => 'no']));
+        $clientIds = $voucher->clients()->pluck('clients.id');
+        if ($clientIds->isNotEmpty()) {
+            Client::whereIn('id', $clientIds)->update(['voucher_issue' => 'no']);
+        }
         $voucher->update(['isDeleted' => 1]);
 
         return back()->with('success', 'Voucher cancelled.');
@@ -349,7 +352,14 @@ class VoucherController extends Controller
     public function reject(Request $request): RedirectResponse
     {
         $request->validate(['id' => ['required', 'integer']]);
-        Voucher::where('id', $request->id)->update(['approved' => 0]);
+        $voucher = Voucher::findOrFail($request->id);
+
+        $clientIds = $voucher->clients()->pluck('clients.id');
+        if ($clientIds->isNotEmpty()) {
+            Client::whereIn('id', $clientIds)->update(['voucher_issue' => 'no']);
+        }
+
+        $voucher->update(['approved' => 0]);
 
         return back()->with('success', 'Voucher rejected.');
     }

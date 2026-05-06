@@ -147,6 +147,13 @@ class ReportController extends Controller
 
     public function agentDetail(int $agentId): Response
     {
+        $authUser = auth()->user();
+
+        // Agents can only view their own balance
+        if ($authUser->hasRole('agent') && $authUser->id !== $agentId) {
+            abort(403);
+        }
+
         $agent = User::findOrFail($agentId);
 
         // DR transactions with adult/child/infant counts from the linked voucher
@@ -252,8 +259,15 @@ class ReportController extends Controller
 
     // ── Agent Balance Report ───────────────────────────────────────────────────
 
-    public function agentBalanceReport(): Response
+    public function agentBalanceReport(): \Illuminate\Http\RedirectResponse|Response
     {
+        $authUser = auth()->user();
+
+        // Agents are redirected straight to their own detail page
+        if ($authUser->hasRole('agent')) {
+            return redirect()->route('admin.reports.agent-detail', $authUser->id);
+        }
+
         // Per-agent: transactions + bank_transection CR/DR, ticket sale total, approved-pending clients
         $agentRows = DB::select("
             SELECT
