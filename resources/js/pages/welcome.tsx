@@ -1285,7 +1285,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             <h4 className="mb-4 font-semibold text-white">Follow Us</h4>
                             <div className="mb-6 flex gap-3">
                                 {[
-                                    { icon: Facebook, label: 'Facebook',href:"https://www.facebook.com/share/1CuBMcJ15D/" },
+                                    { icon: Facebook, label: 'Facebook',href:"https://www.facebook.com/share/1Cpwi5JjKa/" },
                                     // { icon: Twitter, label: 'Twitter',href:"https://www.twitter.com" },
                                     { icon: Instagram, label: 'Instagram',href:"https://www.instagram.com/alabrargroup_of_travels?utm_source=qr&igsh=MXRwem5ybW01cmRjbg==" },
                                     // { icon: Youtube, label: 'YouTube',href:"https://www.youtube.com" },

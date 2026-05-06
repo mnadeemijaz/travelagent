@@ -85,6 +85,8 @@ class ConfigurationController extends Controller
             'madina_contact1_phone'  => ['nullable', 'string', 'max:50'],
             'madina_contact2_name'   => ['nullable', 'string', 'max:100'],
             'madina_contact2_phone'  => ['nullable', 'string', 'max:50'],
+            'contact_name'  => ['nullable', 'string', 'max:100'],
+            'contact_phone'  => ['nullable', 'string', 'max:50'],
         ]);
 
         $config = CompanyConfiguration::instance();

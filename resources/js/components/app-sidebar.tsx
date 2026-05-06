@@ -23,7 +23,7 @@ const allMainNavItems: NavItem[] = [
     { title: 'Visa Companies',    url: '/admin/visa-companies', icon: Shield },
     { title: 'Agent Hotels',      url: '/admin/agent-hotels',   icon: Hotel },
     { title: 'Banks',                url: '/admin/banks',                icon: Landmark },
-    { title: 'Flight Transactions',  url: '/admin/flight-transections',  icon: ArrowLeftRight },
+    // { title: 'Flight Transactions',  url: '/admin/flight-transections',  icon: ArrowLeftRight },
     { title: 'Bank Transactions',    url: '/admin/bank-transections',      icon: ArrowLeftRight },
     { title: 'Group Tickets',        url: '/admin/group-tickets',          icon: Ticket },
     { title: 'Group Bookings',       url: '/admin/group-ticket-bookings',  icon: Ticket },

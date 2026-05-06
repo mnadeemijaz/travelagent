@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 
 interface Agent { id: number; name: string; }
 interface Client {
@@ -12,6 +12,7 @@ interface Client {
     agent: { name: string } | null;
     visa_company: { name: string } | null;
     group_code: string | null; group_name: string | null;
+    vouchers: { id: number }[];
 }
 interface Paginated<T> { data: T[]; current_page: number; last_page: number; per_page: number; links: { url: string | null; label: string; active: boolean }[]; }
 interface Filters { searchText?: string; agent_id?: string; age_group?: string; }
@@ -69,10 +70,11 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
                                 <th className="px-3 py-2 text-left">Agent</th>
                                 <th className="px-3 py-2 text-left">Visa Co.</th>
                                 <th className="px-3 py-2 text-left">Group</th>
+                                <th className="px-3 py-2 text-left">Voucher ID</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {records.data.length === 0 && <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No records found.</td></tr>}
+                            {records.data.length === 0 && <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">No records found.</td></tr>}
                             {records.data.map((c, i) => (
                                 <tr key={c.id} className="hover:bg-muted/30">
                                     <td className="px-3 py-1.5">{(records.current_page - 1) * records.per_page + i + 1}</td>
@@ -85,6 +87,16 @@ export default function PilgrimReport({ records, agents, filters }: { records: P
                                     <td className="px-3 py-1.5">{c.agent?.name ?? '—'}</td>
                                     <td className="px-3 py-1.5">{c.visa_company?.name ?? '—'}</td>
                                     <td className="px-3 py-1.5">{[c.group_code, c.group_name].filter(Boolean).join(' / ') || '—'}</td>
+                                    <td className="px-3 py-1.5">
+                                        {c.vouchers.length > 0 ? c.vouchers.map((v, vi) => (
+                                            <span key={v.id}>
+                                                {vi > 0 && ', '}
+                                                <Link href={route('admin.vouchers.view', v.id)} className="text-blue-600 hover:underline font-medium">
+                                                    #{v.id}
+                                                </Link>
+                                            </span>
+                                        )) : '—'}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -45,12 +45,20 @@ class TicketSaleController extends Controller
             $query->where('agent_id', $agentId);
         }
 
-        if ($date = $request->input('date')) {
-            $query->whereDate('date', $date);
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('date', [$request->input('start_date'), $request->input('end_date')]);
+        } elseif ($request->filled('start_date')) {
+            $query->whereDate('date', '>=', $request->input('start_date'));
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->input('end_date'));
         }
 
-        if ($paymentStatus = $request->input('payment_status')) {
-            $query->where('payment_status', $paymentStatus);
+        if ($flightId = $request->input('flight_id')) {
+            $query->where('flight_id', $flightId);
+        }
+
+        if ($bsp = $request->input('bsp')) {
+            $query->where('bps_sale', $bsp);
         }
 
         $tickets = $query->with(['flight:id,name', 'agent:id,name'])
@@ -61,7 +69,8 @@ class TicketSaleController extends Controller
         return Inertia::render('admin/ticket-sales/index', [
             'tickets' => $tickets,
             'agents'  => User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->orderBy('name')->get(['id', 'name']),
-            'filters' => $request->only(['search', 'agent_id', 'date', 'payment_status']),
+            'flights' => Flight::where('isDeleted', 0)->orderBy('name')->get(['id', 'name']),
+            'filters' => $request->only(['search', 'agent_id', 'start_date', 'end_date', 'flight_id', 'bsp']),
             'isAgent' => $user->hasRole('agent'),
         ]);
     }

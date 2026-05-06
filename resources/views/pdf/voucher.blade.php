@@ -178,33 +178,47 @@
 <img src="{{ $instructionsPath }}" alt="AL Abrar" class="bottom-img">
 @endif
 
-{{-- Emergency Contacts --}}
-@if($company['makkah_contact1_name'] || $company['makkah_contact2_name'] || $company['madina_contact1_name'] || $company['madina_contact2_name'])
-<div class="section-heading" style="margin-top:8px">Helper Contacts</div>
-<table style="margin-top:2px">
-    <tr>
-        <th style="width:50%">Makkah</th>
-        <th style="width:50%">Madina</th>
-    </tr>
-    <tr>
-        <td>
-            @if($company['makkah_contact1_name'])
-            <div>{{ $company['makkah_contact1_name'] }}: <strong>{{ $company['makkah_contact1_phone'] }}</strong></div>
-            @endif
-            @if($company['makkah_contact2_name'])
-            <div>{{ $company['makkah_contact2_name'] }}: <strong>{{ $company['makkah_contact2_phone'] }}</strong></div>
-            @endif
-        </td>
-        <td>
-            @if($company['madina_contact1_name'])
-            <div>{{ $company['madina_contact1_name'] }}: <strong>{{ $company['madina_contact1_phone'] }}</strong></div>
-            @endif
-            @if($company['madina_contact2_name'])
-            <div>{{ $company['madina_contact2_name'] }}: <strong>{{ $company['madina_contact2_phone'] }}</strong></div>
-            @endif
-        </td>
-    </tr>
-</table>
+{{-- Helper Contacts --}}
+@if($voucher['contact'] === 'only_transport')
+    @if($company['contact_name'] || $company['contact_phone'])
+    <div class="section-heading" style="margin-top:8px">Helper Contacts</div>
+    <table style="margin-top:2px">
+        <tr>
+            <td>
+                @if($company['contact_name'])<span>{{ $company['contact_name'] }}: </span>@endif
+                <strong>{{ $company['contact_phone'] }}</strong>
+            </td>
+        </tr>
+    </table>
+    @endif
+@else
+    @if($company['makkah_contact1_name'] || $company['makkah_contact2_name'] || $company['madina_contact1_name'] || $company['madina_contact2_name'])
+    <div class="section-heading" style="margin-top:8px">Helper Contacts</div>
+    <table style="margin-top:2px">
+        <tr>
+            <th style="width:50%">Makkah</th>
+            <th style="width:50%">Madina</th>
+        </tr>
+        <tr>
+            <td>
+                @if($company['makkah_contact1_name'])
+                <div>{{ $company['makkah_contact1_name'] }}: <strong>{{ $company['makkah_contact1_phone'] }}</strong></div>
+                @endif
+                @if($company['makkah_contact2_name'])
+                <div>{{ $company['makkah_contact2_name'] }}: <strong>{{ $company['makkah_contact2_phone'] }}</strong></div>
+                @endif
+            </td>
+            <td>
+                @if($company['madina_contact1_name'])
+                <div>{{ $company['madina_contact1_name'] }}: <strong>{{ $company['madina_contact1_phone'] }}</strong></div>
+                @endif
+                @if($company['madina_contact2_name'])
+                <div>{{ $company['madina_contact2_name'] }}: <strong>{{ $company['madina_contact2_phone'] }}</strong></div>
+                @endif
+            </td>
+        </tr>
+    </table>
+    @endif
 @endif
 
 </body>

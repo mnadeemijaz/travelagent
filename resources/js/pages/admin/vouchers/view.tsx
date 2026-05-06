@@ -67,6 +67,7 @@ interface Props {
         makkah_contact2_name: string | null; makkah_contact2_phone: string | null;
         madina_contact1_name: string | null; madina_contact1_phone: string | null;
         madina_contact2_name: string | null; madina_contact2_phone: string | null;
+        contact_name: string | null; contact_phone: string | null;
     };
 }
 
@@ -341,31 +342,49 @@ export default function VoucherView({ voucher, hotels, clients, ziarats, company
                         </tbody>
                     </table>
 
-                    {/* Emergency Contacts */}
-                    {(company.makkah_contact1_name || company.makkah_contact2_name || company.madina_contact1_name || company.madina_contact2_name) && (
-                        <div className="mt-3 border-t border-gray-300 pt-2">
-                            <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Helper Contacts</div>
-                            <table className="w-full border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Makkah</th>
-                                        <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Madina</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="border border-gray-400 px-2 py-1 text-xs">
-                                            {company.makkah_contact1_name && <div>{company.makkah_contact1_name}: <span className="font-semibold">{company.makkah_contact1_phone}</span></div>}
-                                            {company.makkah_contact2_name && <div>{company.makkah_contact2_name}: <span className="font-semibold">{company.makkah_contact2_phone}</span></div>}
-                                        </td>
-                                        <td className="border border-gray-400 px-2 py-1 text-xs">
-                                            {company.madina_contact1_name && <div>{company.madina_contact1_name}: <span className="font-semibold">{company.madina_contact1_phone}</span></div>}
-                                            {company.madina_contact2_name && <div>{company.madina_contact2_name}: <span className="font-semibold">{company.madina_contact2_phone}</span></div>}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    {/* Helper Contacts */}
+                    {voucher.contact === 'only_transport' ? (
+                        company.contact_name || company.contact_phone ? (
+                            <div className="mt-3 border-t border-gray-300 pt-2">
+                                <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Helper Contacts</div>
+                                <table className="w-full border-collapse">
+                                    <tbody>
+                                        <tr>
+                                            <td className="border border-gray-400 px-2 py-1 text-xs">
+                                                {company.contact_name && <span>{company.contact_name}: </span>}
+                                                <span className="font-semibold">{company.contact_phone}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : null
+                    ) : (
+                        (company.makkah_contact1_name || company.makkah_contact2_name || company.madina_contact1_name || company.madina_contact2_name) && (
+                            <div className="mt-3 border-t border-gray-300 pt-2">
+                                <div className="bg-gray-700 text-white text-xs font-semibold px-3 py-1 mb-1">Helper Contacts</div>
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Makkah</th>
+                                            <th className="border border-gray-400 bg-gray-100 px-2 py-1 text-xs font-semibold text-left w-1/2">Madina</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="border border-gray-400 px-2 py-1 text-xs">
+                                                {company.makkah_contact1_name && <div>{company.makkah_contact1_name}: <span className="font-semibold">{company.makkah_contact1_phone}</span></div>}
+                                                {company.makkah_contact2_name && <div>{company.makkah_contact2_name}: <span className="font-semibold">{company.makkah_contact2_phone}</span></div>}
+                                            </td>
+                                            <td className="border border-gray-400 px-2 py-1 text-xs">
+                                                {company.madina_contact1_name && <div>{company.madina_contact1_name}: <span className="font-semibold">{company.madina_contact1_phone}</span></div>}
+                                                {company.madina_contact2_name && <div>{company.madina_contact2_name}: <span className="font-semibold">{company.madina_contact2_phone}</span></div>}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
                     )}
                 </div>
             </div>

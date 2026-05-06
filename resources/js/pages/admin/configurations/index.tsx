@@ -25,6 +25,8 @@ export interface CompanyConfig {
     madina_contact1_phone: string;
     madina_contact2_name: string;
     madina_contact2_phone: string;
+    contact_name: string;
+    contact_phone: string;
 }
 
 interface Props {
@@ -51,6 +53,8 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
         madina_contact1_phone:  configuration.madina_contact1_phone ?? '',
         madina_contact2_name:   configuration.madina_contact2_name ?? '',
         madina_contact2_phone:  configuration.madina_contact2_phone ?? '',
+        contact_name:  configuration.contact_name ?? '',
+        contact_phone:  configuration.contact_phone ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -235,6 +239,27 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
                             <Input id="madina2-phone" placeholder="+966 5X XXX XXXX"
                                 value={data.madina_contact2_phone}
                                 onChange={e => setData('madina_contact2_phone', e.target.value)} />
+                        </div>
+                    </div>
+                </div>
+                {/* Emergency Contacts if no hotel selected */}
+                <div className="border-t pt-4">
+                    <p className="mb-3 text-sm font-medium text-muted-foreground">Emergency Contacts if Only Transport (shown on vouchers)</p>
+
+                    {/* Makkah */}
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Contact</p>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="contact-name">Contact Name</Label>
+                            <Input id="contact-name" placeholder="e.g. Ahmed Ali"
+                                value={data.contact_name}
+                                onChange={e => setData('contact_name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="contact-phone">Contact Phone</Label>
+                            <Input id="contact-phone" placeholder="+966 5X XXX XXXX"
+                                value={data.contact_phone}
+                                onChange={e => setData('contact_phone', e.target.value)} />
                         </div>
                     </div>
                 </div>

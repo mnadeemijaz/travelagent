@@ -19,7 +19,7 @@ interface Paginated<T> {
     links: { url: string | null; label: string; active: boolean }[];
     current_page: number; last_page: number;
 }
-interface Filters { search?: string; agent_id?: string; date?: string; payment_status?: string; }
+interface Filters { search?: string; agent_id?: string; start_date?: string; end_date?: string; flight_id?: string; bsp?: string; }
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -27,16 +27,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function TicketSalesIndex({
-    tickets, agents, filters, flash, isAgent,
+    tickets, agents, flights, filters, flash, isAgent,
 }: {
-    tickets: Paginated<Ticket>; agents: Agent[]; filters: Filters;
+    tickets: Paginated<Ticket>; agents: Agent[]; flights: Flight[]; filters: Filters;
     flash?: { success?: string }; isAgent: boolean;
 }) {
     const { data, setData, get } = useForm({
-        search: filters.search ?? '',
-        agent_id: filters.agent_id ?? '',
-        date: filters.date ?? '',
-        payment_status: filters.payment_status ?? '',
+        search:     filters.search     ?? '',
+        agent_id:   filters.agent_id   ?? '',
+        start_date: filters.start_date ?? '',
+        end_date:   filters.end_date   ?? '',
+        flight_id:  filters.flight_id  ?? '',
+        bsp:        filters.bsp        ?? '',
     });
 
     function search(e: React.FormEvent) {
@@ -65,11 +67,19 @@ export default function TicketSalesIndex({
                 )}
 
                 {/* Filters */}
-                <form onSubmit={search} className="flex flex-wrap gap-3">
+                <form onSubmit={search} className="flex flex-wrap gap-3 items-end">
                     <Input placeholder="Name / Ticket No / PNR" value={data.search}
                         onChange={e => setData('search', e.target.value)} className="w-52" />
-                    <Input type="date" value={data.date}
-                        onChange={e => setData('date', e.target.value)} className="w-40" />
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-muted-foreground">From</label>
+                        <Input type="date" value={data.start_date}
+                            onChange={e => setData('start_date', e.target.value)} className="w-40" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-muted-foreground">To</label>
+                        <Input type="date" value={data.end_date}
+                            onChange={e => setData('end_date', e.target.value)} className="w-40" />
+                    </div>
                     {!isAgent && (
                         <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
                             className="rounded-md border border-input bg-background px-3 py-2 text-sm">
@@ -77,11 +87,16 @@ export default function TicketSalesIndex({
                             {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
                         </select>
                     )}
-                    <select value={data.payment_status} onChange={e => setData('payment_status', e.target.value)}
+                    <select value={data.flight_id} onChange={e => setData('flight_id', e.target.value)}
                         className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                        <option value="">All Payments</option>
-                        <option value="partial">Partial</option>
-                        <option value="full">Full</option>
+                        <option value="">All Flights</option>
+                        {flights.map(f => <option key={f.id} value={String(f.id)}>{f.name}</option>)}
+                    </select>
+                    <select value={data.bsp} onChange={e => setData('bsp', e.target.value)}
+                        className="rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="">BSP (All)</option>
+                        <option value="yes">BSP: Yes</option>
+                        <option value="no">BSP: No</option>
                     </select>
                     <Button type="submit" variant="outline">Search</Button>
                 </form>

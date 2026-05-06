@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { fmtDate } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 
 interface Agent { id: number; name: string; }
 interface VoucherRow {
@@ -66,10 +66,11 @@ export default function ArrivalReport({ records, agents, filters }: { records: P
                                 <th className="px-3 py-2 text-center">Ch</th>
                                 <th className="px-3 py-2 text-center">In</th>
                                 <th className="px-3 py-2 text-left">Clients</th>
+                                <th className="px-3 py-2 text-left">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {records.data.length === 0 && <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No records found.</td></tr>}
+                            {records.data.length === 0 && <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">No records found.</td></tr>}
                             {records.data.map((v, i) => (
                                 <tr key={v.id} className="hover:bg-muted/30">
                                     <td className="px-3 py-1.5">{(records.current_page - 1) * records.per_page + i + 1}</td>
@@ -82,6 +83,11 @@ export default function ArrivalReport({ records, agents, filters }: { records: P
                                     <td className="px-3 py-1.5 text-center">{v.t_child ?? 0}</td>
                                     <td className="px-3 py-1.5 text-center">{v.t_infant ?? 0}</td>
                                     <td className="px-3 py-1.5">{v.clients.map(c => `${c.name} ${c.last_name ?? ''}`.trim()).join(', ') || '—'}</td>
+                                    <td className="px-3 py-1.5">
+                                        <Link href={route('admin.vouchers.view', v.id)} className="text-blue-600 hover:underline font-medium">
+                                            View
+                                        </Link>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

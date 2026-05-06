@@ -85,7 +85,7 @@ export default function BankTransectionForm({
 
                 {/* Detail */}
                 <div className="space-y-1">
-                    <Label>Detail <span className="text-destructive">*</span></Label>
+                    <Label>Detail</Label>
                     <Input placeholder="Transaction detail" value={data.detail}
                         onChange={e => setData('detail', e.target.value)} maxLength={100} />
                     {errors.detail && <p className="text-xs text-destructive">{errors.detail}</p>}

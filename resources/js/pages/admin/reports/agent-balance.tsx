@@ -153,7 +153,11 @@ export default function AgentBalanceReport({
                                     return (
                                         <tr key={b.id} className="hover:bg-muted/30">
                                             <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                                            <td className="px-3 py-2 font-medium">{b.name}</td>
+                                            <td className="px-3 py-2 font-medium">
+                                                <Link href={`/admin/bank-transections?bank_id=${b.id}`} className="text-blue-600 hover:underline">
+                                                    {b.name}
+                                                </Link>
+                                            </td>
                                             <td className="px-3 py-2 text-right text-green-700 font-semibold">
                                                 {fmt(b.credit_total)}
                                             </td>

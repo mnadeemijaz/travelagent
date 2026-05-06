@@ -24,6 +24,8 @@ class CompanyConfiguration extends Model
         'madina_contact1_phone',
         'madina_contact2_name',
         'madina_contact2_phone',
+        'contact_name',
+        'contact_phone',
     ];
 
     protected $casts = [
@@ -44,6 +46,8 @@ class CompanyConfiguration extends Model
             'tagline'      => '',
             'phone'        => '',
             'email'        => '',
+            'contact_name' => '',
+            'contact_phone' => '',
         ]);
     }
 }

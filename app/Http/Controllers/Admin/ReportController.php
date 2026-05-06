@@ -19,7 +19,7 @@ class ReportController extends Controller
     public function pilgrimReport(Request $request): Response
     {
         $query = Client::query()
-            ->with(['agent', 'visaCompany'])
+            ->with(['agent', 'visaCompany', 'vouchers:id'])
             ->where('isDeleted', 0);
 
         if ($search = $request->input('searchText')) {
@@ -60,6 +60,8 @@ class ReportController extends Controller
             ]);
         } elseif ($request->filled('start_date')) {
             $query->whereDate('arv_date', '>=', $request->input('start_date'));
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('arv_date', '<=', $request->input('end_date'));
         }
 
         if ($agentId = $request->input('agent_id')) {
@@ -89,6 +91,8 @@ class ReportController extends Controller
             ]);
         } elseif ($request->filled('start_date')) {
             $query->whereDate('date', '>=', $request->input('start_date'));
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->input('end_date'));
         }
 
         if ($agentId = $request->input('agent_id')) {

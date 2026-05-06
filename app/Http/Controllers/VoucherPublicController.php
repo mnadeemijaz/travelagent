@@ -90,6 +90,8 @@ class VoucherPublicController extends Controller
                 'madina_contact1_phone' => $config->madina_contact1_phone,
                 'madina_contact2_name'  => $config->madina_contact2_name,
                 'madina_contact2_phone' => $config->madina_contact2_phone,
+                'contact_name'          => $config->contact_name,
+                'contact_phone'         => $config->contact_phone,
             ],
         ]);
     }
