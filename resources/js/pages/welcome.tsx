@@ -202,7 +202,7 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
         email: '',
         password: '',
         password_confirmation: '',
-        role: 'user' as 'user' | 'agent',
+        role: 'agent' as const,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -259,34 +259,6 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
                     onChange={(e) => setData('password_confirmation', e.target.value)}
                 />
                 {errors.password_confirmation && <p className="text-xs text-red-500">{errors.password_confirmation}</p>}
-            </div>
-            <div className="space-y-1">
-                <Label>Register As</Label>
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        type="button"
-                        onClick={() => setData('role', 'user')}
-                        className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-colors ${
-                            data.role === 'user'
-                                ? 'border-teal-600 bg-teal-50 text-teal-700'
-                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                        }`}
-                    >
-                        Traveler
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setData('role', 'agent')}
-                        className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-colors ${
-                            data.role === 'agent'
-                                ? 'border-teal-600 bg-teal-50 text-teal-700'
-                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                        }`}
-                    >
-                        Travel Agent
-                    </button>
-                </div>
-                {errors.role && <p className="text-xs text-red-500">{errors.role}</p>}
             </div>
             <Button type="submit" disabled={processing} className="w-full bg-teal-600 hover:bg-teal-700">
                 {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}

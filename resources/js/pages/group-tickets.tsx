@@ -78,7 +78,7 @@ function LoginForm({ onClose }: { onClose: () => void }) {
 function RegisterForm({ onClose }: { onClose: () => void }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '', email: '', password: '', password_confirmation: '',
-        role: 'user' as 'user' | 'agent',
+        role: 'agent' as const,
     });
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
