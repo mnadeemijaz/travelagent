@@ -54,10 +54,15 @@ class ClientController extends Controller
                          ->paginate(20)
                          ->withQueryString();
 
+        $isAgent = $user->hasRole('agent');
+
         return Inertia::render('admin/clients/index', [
-            'clients'    => $clients,
-            'agents'     => User::whereHas('roles', function($q){ $q->where('name', 'agent'); })->orderBy('name')->get(['id', 'name']),
-            'filters'    => $request->only(['searchText', 'age_group', 'visa_approve', 'agent_id', 'documentation']),
+            'clients' => $clients,
+            'agents'  => $isAgent
+                ? collect([['id' => $user->id, 'name' => $user->name]])
+                : User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->orderBy('name')->get(['id', 'name']),
+            'filters'  => $request->only(['searchText', 'age_group', 'visa_approve', 'agent_id', 'documentation']),
+            'isAgent'  => $isAgent,
         ]);
     }
 
@@ -65,6 +70,10 @@ class ClientController extends Controller
 
     public function create(): Response
     {
+        if (auth()->user()->hasRole('agent')) {
+            abort(403);
+        }
+
         return Inertia::render('admin/clients/create', [
             'agents'        => User::whereHas('roles', function($q){ $q->where('name', 'agent'); })->orderBy('name')->get(['id', 'name']),
             'visaCompanies' => VisaCompany::orderBy('name')->get(['id', 'name']),
@@ -105,6 +114,10 @@ class ClientController extends Controller
 
     public function edit(Client $client): Response
     {
+        if (auth()->user()->hasRole('agent')) {
+            abort(403);
+        }
+
         return Inertia::render('admin/clients/edit', [
             'client'        => $client,
             'agents'        => User::whereHas('roles', function($q){ $q->where('name', 'agent'); })->orderBy('name')->get(['id', 'name']),
@@ -144,6 +157,10 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        if (auth()->user()->hasRole('agent')) {
+            abort(403);
+        }
+
         $client->update(['isDeleted' => 1]);
 
         return redirect()->route('admin.clients.index')->with('success', 'Client deleted.');

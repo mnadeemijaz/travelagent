@@ -55,11 +55,13 @@ export default function ClientsIndex({
     agents,
     filters,
     flash,
+    isAgent,
 }: {
     clients: Paginated<Client>;
     agents: Agent[];
     filters: Filters;
     flash?: { success?: string };
+    isAgent: boolean;
 }) {
     const { data, setData, get, processing } = useForm({
         searchText: filters.searchText ?? '',
@@ -113,7 +115,9 @@ export default function ClientsIndex({
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Client Management</h1>
-                    <Button asChild><Link href="/admin/clients/create">+ Add New</Link></Button>
+                    {!isAgent && (
+                        <Button asChild><Link href="/admin/clients/create">+ Add New</Link></Button>
+                    )}
                 </div>
 
                 {flash?.success && (
@@ -143,16 +147,18 @@ export default function ClientsIndex({
                         <option value="no">Not Approved</option>
                     </select>
 
-                    <select
-                        value={data.agent_id}
-                        onChange={e => setData('agent_id', e.target.value)}
-                        className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    >
-                        <option value="">All Agents</option>
-                        {agents.map(a => (
-                            <option key={a.id} value={String(a.id)}>{a.name}</option>
-                        ))}
-                    </select>
+                    {!isAgent && (
+                        <select
+                            value={data.agent_id}
+                            onChange={e => setData('agent_id', e.target.value)}
+                            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="">All Agents</option>
+                            {agents.map(a => (
+                                <option key={a.id} value={String(a.id)}>{a.name}</option>
+                            ))}
+                        </select>
+                    )}
 
                     <select
                         value={data.documentation}
@@ -193,13 +199,13 @@ export default function ClientsIndex({
                                 <th className="px-3 py-3 text-left font-medium">Agent</th>
                                 <th className="px-3 py-3 text-left font-medium">Pkg</th>
                                 <th className="px-3 py-3 text-left font-medium">Docs</th>
-                                <th className="px-3 py-3 text-right font-medium">Actions</th>
+                                {!isAgent && <th className="px-3 py-3 text-right font-medium">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {clients.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={13} className="px-4 py-8 text-center text-muted-foreground">
+                                    <td colSpan={isAgent ? 12 : 14} className="px-4 py-8 text-center text-muted-foreground">
                                         No clients found.
                                     </td>
                                 </tr>
@@ -210,29 +216,31 @@ export default function ClientsIndex({
                                         {(clients.current_page - 1) * clients.per_page + i + 1}
                                     </td>
                                     <td className="px-3 py-2">
-                                        {c.voucher_issue === 'no' ? (
-                                            c.visa_approve === 'no' ? (
-                                                <button
-                                                    onClick={() => toggleVisa(c)}
-                                                    className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 hover:bg-emerald-200"
-                                                >
-                                                    ✓ Approve
-                                                </button>
+                                        {!isAgent && (
+                                            c.voucher_issue === 'no' ? (
+                                                c.visa_approve === 'no' ? (
+                                                    <button
+                                                        onClick={() => toggleVisa(c)}
+                                                        className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 hover:bg-emerald-200"
+                                                    >
+                                                        ✓ Approve
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => toggleVisa(c)}
+                                                        className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700 hover:bg-red-200"
+                                                    >
+                                                        ✗ Revoke
+                                                    </button>
+                                                )
                                             ) : (
                                                 <button
-                                                    onClick={() => toggleVisa(c)}
-                                                    className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700 hover:bg-red-200"
+                                                    onClick={() => openVisaModal(c.id)}
+                                                    className="rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-700 hover:bg-sky-200"
                                                 >
-                                                    ✗ Revoke
+                                                    Edit Visa
                                                 </button>
                                             )
-                                        ) : (
-                                            <button
-                                                onClick={() => openVisaModal(c.id)}
-                                                className="rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-700 hover:bg-sky-200"
-                                            >
-                                                Edit Visa
-                                            </button>
                                         )}
                                     </td>
                                     <td className="px-3 py-2 text-muted-foreground">{c.sr_name ?? '—'}</td>
@@ -250,20 +258,22 @@ export default function ClientsIndex({
                                             {c.document === 'yes' ? 'Yes' : 'No'}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button variant="outline" size="sm" asChild>
-                                                <Link href={`/admin/clients/${c.id}/edit`}>Edit</Link>
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => destroy(c.id, c.name)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </td>
+                                    {!isAgent && (
+                                        <td className="px-3 py-2 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="outline" size="sm" asChild>
+                                                    <Link href={`/admin/clients/${c.id}/edit`}>Edit</Link>
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => destroy(c.id, c.name)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
