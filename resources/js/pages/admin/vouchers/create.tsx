@@ -351,7 +351,7 @@ export default function VouchersCreate({
                                         <tr>
                                             <th className="px-2 py-1 text-left">Name</th>
                                             <th className="px-2 py-1 text-left">PP No</th>
-                                            <th className="px-2 py-1 text-left">DOB</th>
+                                            {/* <th className="px-2 py-1 text-left">DOB</th> */}
                                             <th className="px-2 py-1 text-left">Age Group</th>
                                         </tr>
                                     </thead>
@@ -360,7 +360,7 @@ export default function VouchersCreate({
                                             <tr key={c.id}>
                                                 <td className="px-2 py-1">{c.sr_name} {c.name} {c.last_name}</td>
                                                 <td className="px-2 py-1">{c.ppno}</td>
-                                                <td className="px-2 py-1">{c.dob ? fmtDate(c.dob) : '—'}</td>
+                                                {/* <td className="px-2 py-1">{c.dob ? fmtDate(c.dob) : '—'}</td> */}
                                                 <td className="px-2 py-1 capitalize">{c.age_group}</td>
                                             </tr>
                                         ))}
@@ -598,7 +598,7 @@ export default function VouchersCreate({
                                         <th className="px-2 py-2 text-left">Select</th>
                                         <th className="px-2 py-2 text-left">Name</th>
                                         <th className="px-2 py-2 text-left">PP No</th>
-                                        <th className="px-2 py-2 text-left">DOB</th>
+                                        {/* <th className="px-2 py-2 text-left">DOB</th> */}
                                         <th className="px-2 py-2 text-left">Age Group</th>
                                         <th className="px-2 py-2 text-left">Account PKG</th>
                                         <th className="px-2 py-2 text-left">Group Code</th>
@@ -618,7 +618,7 @@ export default function VouchersCreate({
                                             </td>
                                             <td className="px-2 py-1.5">{c.sr_name} {c.name} {c.last_name}</td>
                                             <td className="px-2 py-1.5">{c.ppno}</td>
-                                            <td className="px-2 py-1.5">{c.dob ? fmtDate(c.dob) : '—'}</td>
+                                            {/* <td className="px-2 py-1.5">{c.dob ? fmtDate(c.dob) : '—'}</td> */}
                                             <td className="px-2 py-1.5 capitalize">{c.age_group}</td>
                                             <td className="px-2 py-1.5">{c.account_pkg}</td>
                                             <td className="px-2 py-1.5">{c.group_code}</td>

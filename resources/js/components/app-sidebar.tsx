@@ -10,8 +10,10 @@ const allMainNavItems: NavItem[] = [
     { title: 'Dashboard',         url: '/dashboard',            icon: LayoutGrid },
     { title: 'User Management',   url: '/users',                icon: Users },
     { title: 'Client Management', url: '/admin/clients',        icon: BadgeCheck },
-    { title: 'Vouchers',          url: '/admin/vouchers',       icon: ScrollText },
     { title: 'Ticket Sales',      url: '/admin/ticket-sales',   icon: Ticket },
+    { title: 'Bank Transactions',    url: '/admin/bank-transections',      icon: ArrowLeftRight },
+    { title: 'Agent Balance',     url: '/admin/reports/agent-balance', icon: BarChart2 },
+    { title: 'Vouchers',          url: '/admin/vouchers',       icon: ScrollText },
     { title: 'Transactions',      url: '/admin/transactions',   icon: Wallet },
     { title: 'Hotels',            url: '/admin/hotels',         icon: Building2 },
     { title: 'Flights',           url: '/admin/flights',        icon: Plane },
@@ -24,7 +26,6 @@ const allMainNavItems: NavItem[] = [
     { title: 'Agent Hotels',      url: '/admin/agent-hotels',   icon: Hotel },
     { title: 'Banks',                url: '/admin/banks',                icon: Landmark },
     // { title: 'Flight Transactions',  url: '/admin/flight-transections',  icon: ArrowLeftRight },
-    { title: 'Bank Transactions',    url: '/admin/bank-transections',      icon: ArrowLeftRight },
     { title: 'Group Tickets',        url: '/admin/group-tickets',          icon: Ticket },
     { title: 'Group Bookings',       url: '/admin/group-ticket-bookings',  icon: Ticket },
     { title: 'Bank Details',         url: '/admin/bank-details',           icon: Landmark },
@@ -43,7 +44,6 @@ const reportNavItems: NavItem[] = [
     { title: 'Departure Report',  url: '/admin/reports/departure',     icon: BarChart2 },
     { title: 'Visa Report',       url: '/admin/reports/visa',          icon: BarChart2 },
     { title: 'Agent-Wise Report', url: '/admin/reports/pilgrim-wise',  icon: BarChart2 },
-    { title: 'Agent Balance',     url: '/admin/reports/agent-balance', icon: BarChart2 },
 ];
 
 export function AppSidebar() {
