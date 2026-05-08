@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,7 +38,7 @@ class UserManagementController extends Controller
 
         return Inertia::render('users/index', [
             'users' => $users,
-            'flash' => session()->only(['success']),
+            'flash' => session()->only(['success', 'error']),
         ]);
     }
 
@@ -155,7 +156,13 @@ class UserManagementController extends Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        $user->delete();
+        try {
+            DB::transaction(function () use ($user) {
+                $user->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('users.index')->with('error', 'Cannot delete this user because they have associated records in the system.');
+        }
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }

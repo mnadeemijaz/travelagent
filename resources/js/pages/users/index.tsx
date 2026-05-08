@@ -19,7 +19,7 @@ interface User {
 
 interface Props {
     users: User[];
-    flash?: { success?: string };
+    flash?: { success?: string; error?: string };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -62,6 +62,11 @@ export default function UsersIndex({ users, flash }: Props) {
                 {flash?.success && (
                     <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">
                         {flash.success}
+                    </div>
+                )}
+                {flash?.error && (
+                    <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {flash.error}
                     </div>
                 )}
 

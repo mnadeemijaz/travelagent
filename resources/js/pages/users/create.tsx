@@ -25,7 +25,7 @@ export default function UsersCreate({ roles }: Props) {
         name: '',
         email: '',
         password: '',
-        role: '',
+        role: 'agent',
         company_name: '',
         address: '',
         mobile: '',
@@ -126,10 +126,17 @@ export default function UsersCreate({ roles }: Props) {
                             onChange={(e) => setData('address', e.target.value)}
                             placeholder="Office / home address"
                         />
+                        <Input
+                            id="role"
+                            value={"agent"}
+                            type="hidden"
+                            onChange={(e) => setData('role', e.target.value)}
+                            placeholder="Role"
+                        />
                         {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
                     </div>
 
-                    <div className="space-y-1">
+                    {/* <div className="space-y-1">
                         <Label htmlFor="role">Role</Label>
                         <Select value={data.role} onValueChange={(value) => setData('role', value)}>
                             <SelectTrigger id="role">
@@ -144,7 +151,7 @@ export default function UsersCreate({ roles }: Props) {
                             </SelectContent>
                         </Select>
                         {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
-                    </div>
+                    </div> */}
 
                     <Button type="submit" disabled={processing}>
                         Create User

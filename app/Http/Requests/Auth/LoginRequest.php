@@ -59,6 +59,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Block users with no role assigned
+        if (Auth::user()->roles->isEmpty()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account has no role assigned. Please contact the administrator.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
