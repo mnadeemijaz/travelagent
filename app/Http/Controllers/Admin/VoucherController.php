@@ -126,6 +126,7 @@ class VoucherController extends Controller
             'vouchers' => $vouchers,
             'agents'   => User::whereHas('roles', fn($q) => $q->where('name', 'agent'))->orderBy('name')->get(['id', 'name']),
             'filters'  => $request->only(['searchText', 'agent_id', 'date', 'v_status']),
+            'isAgent'  => $user->hasRole('agent'),
         ]);
     }
 

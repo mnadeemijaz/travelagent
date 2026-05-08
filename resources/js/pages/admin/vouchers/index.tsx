@@ -40,9 +40,9 @@ function fmtDate(v: string | null): string {
 }
 
 export default function VouchersIndex({
-    vouchers, agents, filters, flash,
+    vouchers, agents, filters, flash, isAgent,
 }: {
-    vouchers: Paginated<Voucher>; agents: Agent[]; filters: Filters; flash?: { success?: string };
+    vouchers: Paginated<Voucher>; agents: Agent[]; filters: Filters; flash?: { success?: string }; isAgent: boolean;
 }) {
     const { data, setData, get, processing } = useForm({
         searchText: filters.searchText ?? '',
@@ -81,14 +81,16 @@ export default function VouchersIndex({
 
                 {/* Filters */}
                 <form onSubmit={search} className="flex flex-wrap items-end gap-3">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-xs text-muted-foreground">Party</span>
-                        <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
-                            className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                            <option value="">All Agents</option>
-                            {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
-                        </select>
-                    </div>
+                    {!isAgent && (
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">Party</span>
+                            <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
+                                className="rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                <option value="">All Agents</option>
+                                {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
+                            </select>
+                        </div>
+                    )}
                     <div className="flex flex-col gap-1">
                         <span className="text-xs text-muted-foreground">Date</span>
                         <input type="date" value={data.date} onChange={e => setData('date', e.target.value)}
