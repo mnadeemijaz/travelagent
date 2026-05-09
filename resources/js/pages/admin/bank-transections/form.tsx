@@ -66,10 +66,10 @@ export default function BankTransectionForm({
 
                 {/* Agent */}
                 <div className="space-y-1">
-                    <Label>Agent <span className="text-destructive">*</span></Label>
+                    <Label>Agent</Label>
                     <select value={data.agent_id} onChange={e => setData('agent_id', e.target.value)}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
-                        <option value="">— Select Agent —</option>
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="">— No Agent —</option>
                         {agents.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
                     </select>
                     {errors.agent_id && <p className="text-xs text-destructive">{errors.agent_id}</p>}

@@ -85,10 +85,11 @@ class BankTransectionController extends Controller
             'date'         => ['required', 'date'],
             'detail'       => ['nullable', 'string', 'max:100'],
             'bank_id'      => ['required', 'integer', 'exists:banks,id'],
-            'agent_id'     => ['required', 'integer', 'exists:users,id'],
+            'agent_id'     => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         $validated['detail'] = $validated['detail'] ?? '';
+        $validated['agent_id'] = $validated['agent_id'] ?? null;
         BankTransection::create($validated);
 
         return redirect()->route('admin.bank-transections.index')->with('success', 'Transaction added successfully.');
@@ -111,10 +112,11 @@ class BankTransectionController extends Controller
             'date'         => ['required', 'date'],
             'detail'       => ['nullable', 'string', 'max:100'],
             'bank_id'      => ['required', 'integer', 'exists:banks,id'],
-            'agent_id'     => ['required', 'integer', 'exists:users,id'],
+            'agent_id'     => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         $validated['detail'] = $validated['detail'] ?? '';
+        $validated['agent_id'] = $validated['agent_id'] ?? null;
         $bankTransection->update($validated);
 
         return redirect()->route('admin.bank-transections.index')->with('success', 'Transaction updated successfully.');
