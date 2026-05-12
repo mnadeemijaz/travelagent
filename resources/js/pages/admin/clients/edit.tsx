@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface Agent { id: number; name: string; }
 interface VisaCompany { id: number; name: string; }
@@ -57,6 +58,8 @@ export default function ClientsEdit({
     visaCompanies: VisaCompany[];
     flash?: { success?: string };
 }) {
+    const [ppnoTaken, setPpnoTaken] = useState(false);
+
     const { data, setData, put, processing, errors } = useForm({
         sr_name: client.sr_name ?? '',
         name: client.name,
@@ -80,8 +83,20 @@ export default function ClientsEdit({
         setData('age_group', calcAgeGroup(val));
     }
 
+    async function checkPpno(val: string) {
+        if (!val) { setPpnoTaken(false); return; }
+        const res = await fetch('/admin/clients/check-passport', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '' },
+            body: JSON.stringify({ ppno: val, id: client.id }),
+        });
+        const available = await res.text();
+        setPpnoTaken(available.trim() === 'false');
+    }
+
     function submit(e: React.FormEvent) {
         e.preventDefault();
+        if (ppnoTaken) return;
         put(`/admin/clients/${client.id}`);
     }
 
@@ -147,7 +162,15 @@ export default function ClientsEdit({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label>Passport No</Label>
-                            <Input value={data.ppno} onChange={e => setData('ppno', e.target.value)} maxLength={50} />
+                            <Input
+                                value={data.ppno}
+                                onChange={e => { setData('ppno', e.target.value); setPpnoTaken(false); }}
+                                onBlur={e => checkPpno(e.target.value)}
+                                maxLength={50}
+                                className={ppnoTaken ? 'border-destructive' : ''}
+                            />
+                            {ppnoTaken && <p className="text-xs text-destructive">Passport No already exists.</p>}
+                            {errors.ppno && <p className="text-xs text-destructive">{errors.ppno}</p>}
                         </div>
                         <div className="space-y-1">
                             <Label>Agent</Label>
@@ -222,7 +245,7 @@ export default function ClientsEdit({
                     </div>
 
                     <div className="flex gap-3">
-                        <Button type="submit" disabled={processing} className="bg-teal-600 hover:bg-teal-700">
+                        <Button type="submit" disabled={processing || ppnoTaken} className="bg-teal-600 hover:bg-teal-700">
                             Update Client
                         </Button>
                         <Button type="button" variant="destructive" asChild>

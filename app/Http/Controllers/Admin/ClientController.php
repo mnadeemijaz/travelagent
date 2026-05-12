@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\VisaCompany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -93,7 +94,7 @@ class ClientController extends Controller
             'cnic'            => ['nullable', 'string', 'max:20'],
             'sr_name'         => ['nullable', 'string', 'max:128'],
             'dob'             => ['nullable', 'date'],
-            'ppno'            => ['nullable', 'string', 'max:50'],
+            'ppno'            => ['nullable', 'string', 'max:50', Rule::unique('clients', 'ppno')->where('isDeleted', 0)],
             'age_group'       => ['nullable', 'in:adult,child,infant'],
             'visa_id'         => ['nullable', 'integer'],
             'agent_id'        => ['nullable', 'integer'],
@@ -133,7 +134,7 @@ class ClientController extends Controller
             'cnic'                => ['nullable', 'string', 'max:20'],
             'sr_name'             => ['nullable', 'string', 'max:128'],
             'dob'                 => ['nullable', 'date'],
-            'ppno'                => ['nullable', 'string', 'max:50'],
+            'ppno'                => ['nullable', 'string', 'max:50', Rule::unique('clients', 'ppno')->where('isDeleted', 0)->ignore($client->id)],
             'passport_issue_date' => ['nullable', 'date'],
             'passport_exp_date'   => ['nullable', 'date'],
             'age_group'           => ['nullable', 'in:adult,child,infant'],

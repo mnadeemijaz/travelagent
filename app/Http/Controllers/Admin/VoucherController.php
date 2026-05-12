@@ -200,9 +200,12 @@ class VoucherController extends Controller
             $tChild  = $clients->where('age_group', 'child')->count();
             $tInfant = $clients->where('age_group', 'infant')->count();
 
+            // Compute total_nights server-side to avoid front-end async race condition
+            $totalNights = collect($hotelRows)->sum(fn($r) => (int) ($r['city_nights'] ?? 0));
+
             $voucher = Voucher::create(array_merge(
                 collect($validated)->except(['client_ids', 'hotels', 'ziarat_ids'])->toArray(),
-                ['t_adult' => $tAdult, 't_child' => $tChild, 't_infant' => $tInfant]
+                ['t_adult' => $tAdult, 't_child' => $tChild, 't_infant' => $tInfant, 'total_nights' => $totalNights]
             ));
 
             // Attach clients — mark voucher_issue = yes
@@ -293,12 +296,17 @@ class VoucherController extends Controller
             $ziaratIds = $validated['ziarat_ids'] ?? [];
 
             $clients = Client::whereIn('id', $clientIds)->get(['id', 'age_group']);
+
+            // Compute total_nights server-side to avoid front-end async race condition
+            $totalNights = collect($hotelRows)->sum(fn($r) => (int) ($r['city_nights'] ?? 0));
+
             $voucher->update(array_merge(
                 collect($validated)->except(['client_ids', 'hotels', 'ziarat_ids'])->toArray(),
                 [
-                    't_adult'  => $clients->where('age_group', 'adult')->count(),
-                    't_child'  => $clients->where('age_group', 'child')->count(),
-                    't_infant' => $clients->where('age_group', 'infant')->count(),
+                    't_adult'      => $clients->where('age_group', 'adult')->count(),
+                    't_child'      => $clients->where('age_group', 'child')->count(),
+                    't_infant'     => $clients->where('age_group', 'infant')->count(),
+                    'total_nights' => $totalNights,
                 ]
             ));
 
