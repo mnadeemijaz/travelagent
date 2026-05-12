@@ -170,7 +170,7 @@ class ReportController extends Controller
               AND t.payment_type = 'dr'
               AND t.account_id = ?
             GROUP BY t.id, t.date, t.detail, t.amount, t.voucher_id
-            ORDER BY t.id DESC
+            ORDER BY t.date DESC, t.id DESC
         ", [$agentId]);
 
         // CR transactions
@@ -180,7 +180,7 @@ class ReportController extends Controller
             WHERE t.isDeleted = 0
               AND t.payment_type = 'cr'
               AND t.account_id = ?
-            ORDER BY t.id DESC
+            ORDER BY t.date DESC, t.id DESC
         ", [$agentId]);
 
         // Clients with visa approved but no voucher issued (pending charges)
@@ -209,7 +209,7 @@ class ReportController extends Controller
             WHERE bt.isDeleted = 0
               AND bt.payment_type = 'dr'
               AND bt.agent_id = ?
-            ORDER BY bt.id DESC
+            ORDER BY bt.date DESC, bt.id DESC
         ", [$agentId]);
 
         // Bank CR transactions
@@ -221,7 +221,7 @@ class ReportController extends Controller
             WHERE bt.isDeleted = 0
               AND bt.payment_type = 'cr'
               AND bt.agent_id = ?
-            ORDER BY bt.id DESC
+            ORDER BY bt.date DESC, bt.id DESC
         ", [$agentId]);
 
         // Ticket sales
@@ -239,6 +239,10 @@ class ReportController extends Controller
 
         $allCrTransactions = array_merge($crTransactions, $bankCrTransactions);
         $allDrTransactions = array_merge($drTransactions, $bankDrTransactions);
+
+        // Sort merged arrays by transaction date descending (use id as tiebreaker)
+        usort($allCrTransactions, fn($a, $b) => strcmp($b->date, $a->date) ?: $b->id <=> $a->id);
+        usort($allDrTransactions, fn($a, $b) => strcmp($b->date, $a->date) ?: $b->id <=> $a->id);
 
         $ticketSaleTotal = array_sum(array_column($ticketSales, 'sale'));
         $totalCr = array_sum(array_column($allCrTransactions, 'amount'));

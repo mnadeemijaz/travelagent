@@ -262,7 +262,7 @@ export default function AgentDetailReport({
                                     <th className="px-3 py-2 text-left font-medium">Route</th>
                                     <th className="px-3 py-2 text-left font-medium">Flight</th>
                                     {/* <th className="px-3 py-2 text-right font-medium">Purchase</th> */}
-                                    <th className="px-3 py-2 text-right font-medium">Sale</th>
+                                    <th className="px-3 py-2 text-right font-medium">Ticket Amount</th>
                                     {/* <th className="px-3 py-2 text-right font-medium">Profit</th> */}
                                 </tr>
                             </thead>

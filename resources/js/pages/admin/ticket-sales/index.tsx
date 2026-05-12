@@ -130,6 +130,7 @@ export default function TicketSalesIndex({
                                 <th className="px-3 py-3 text-right font-medium">Profit</th>
                                 <th className="px-3 py-3 text-left font-medium">BPS</th>
                                 <th className="px-3 py-3 text-left font-medium">Payment</th>
+                                <th className="px-3 py-3 text-left font-medium">Remaining</th>
                                 <th className="px-3 py-3 text-right font-medium">Actions</th>
                             </tr>
                         </thead>
@@ -168,6 +169,7 @@ export default function TicketSalesIndex({
                                             </span>
                                         ) : '—'}
                                     </td>
+                                    <td className="px-3 py-2">{t.payment_status === 'full' ? 'Full' : `Remaining: ${ (t.sale - (t.paid_amount ?? 0)).toLocaleString() }`}</td>
                                     <td className="px-3 py-2 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <Button variant="outline" size="sm" asChild>

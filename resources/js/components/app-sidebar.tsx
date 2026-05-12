@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BadgeCheck, BarChart2, Building2, Car, FileText, Hotel, Landmark, LayoutGrid, MapPin, Plane, Receipt, ScrollText, Shield, Ticket, Users, Wallet, ArrowLeftRight } from 'lucide-react';
+import { BadgeCheck, BarChart2, Building2, Calculator, Car, FileText, Hotel, Landmark, LayoutGrid, MapPin, Plane, Receipt, ScrollText, Shield, Ticket, Users, Wallet, ArrowLeftRight } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const allMainNavItems: NavItem[] = [
@@ -34,6 +34,7 @@ const allMainNavItems: NavItem[] = [
 const agentNavItems: NavItem[] = [
     { title: 'Client Management', url: '/admin/clients',               icon: BadgeCheck },
     { title: 'Vouchers',          url: '/admin/vouchers',              icon: ScrollText },
+    { title: 'Umrah Calculator',  url: '/umrah-calculator',            icon: Calculator },
     { title: 'Group Bookings',    url: '/admin/group-ticket-bookings', icon: Ticket },
     { title: 'Agent Balance',     url: '/admin/reports/agent-balance', icon: BarChart2 },
 ];

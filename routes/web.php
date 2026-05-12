@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UmrahCalculatorController;
 use App\Http\Controllers\VoucherPublicController;
 use App\Http\Controllers\Admin\AgentHotelController;
 use App\Http\Controllers\Admin\BankDetailController;
@@ -79,6 +80,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [HotelOtherController::class, 'dashboard'])->name('dashboard');
+    Route::get('umrah-calculator', [UmrahCalculatorController::class, 'index'])->name('umrah-calculator');
 
     // ── Agent-accessible routes ───────────────────────────────────────────────
     Route::prefix('admin')->name('admin.')->group(function () {
