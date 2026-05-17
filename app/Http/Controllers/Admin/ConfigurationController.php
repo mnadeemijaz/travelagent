@@ -72,7 +72,7 @@ class ConfigurationController extends Controller
             'address'      => ['nullable', 'string', 'max:500'],
             'tagline'      => ['nullable', 'string', 'max:200'],
             'phone'        => ['nullable', 'string', 'max:50'],
-            'email'        => ['nullable', 'email', 'max:150'],
+            'email'        => ['nullable', 'string', 'max:150'],
             'adult_rate'             => ['nullable', 'numeric', 'min:0'],
             'child_rate'             => ['nullable', 'numeric', 'min:0'],
             'infant_rate'            => ['nullable', 'numeric', 'min:0'],

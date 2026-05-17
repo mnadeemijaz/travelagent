@@ -121,7 +121,7 @@ export default function CompanyConfigurationForm({ configuration, configSaved = 
                     <Label htmlFor="cfg-email">Email Address</Label>
                     <Input
                         id="cfg-email"
-                        type="email"
+                        type="text"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         placeholder="info@company.com"

@@ -14,6 +14,83 @@ import {
     XCircle,
 } from 'lucide-react';
 
+// ── Agent service cards ────────────────────────────────────────────────────────
+const agentCards = [
+    {
+        title: 'Group Tickets',
+        subtitle: 'Manage and book airline group tickets',
+        href: '/group-tickets',
+        image: '/storage/group-tickets.jpg',
+    },
+    {
+        title: 'Vouchers',
+        subtitle: 'See all your vouchers and their approval status',
+        href: '/admin/vouchers',
+        image: '/storage/voucher.jpg',
+    },
+    {
+        title: 'Umrah Calculator',
+        subtitle: 'Create Your Own Umrah Package',
+        href: '/umrah-calculator',
+        image: '/storage/umrah-calculator.jpg',
+    },
+    {
+        title: 'Group Bookings',
+        subtitle: 'JED-MAK-MED Round Trip',
+        href: '/admin/group-ticket-bookings',
+        image: '/storage/group-booking.jpg',
+    },
+    {
+        title: 'Client Management',
+        subtitle: 'manage your clients and their pilgrims',
+        href: '/admin/clients',
+        image: '/storage/client.jpg',
+    },
+    {
+        title: 'Agent Balance',
+        subtitle: 'View your account balance and reports',
+        href: '/admin/reports/agent-balance',
+        image: '/storage/balance.jpg',
+    },
+];
+
+function AgentDashboard({ userName }: { userName: string }) {
+    return (
+        <div className="min-h-full bg-[#4a9aaa] p-6 md:p-10">
+            <div className="max-w-6xl mx-auto">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-white">Welcome, {userName}</h1>
+                    <p className="text-white/75 mt-1 text-sm">Select a service below to get started</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {agentCards.map((card) => (
+                        <Link
+                            key={card.href}
+                            href={card.href}
+                            className="block group"
+                        >
+                            <div className="bg-white rounded-2xl overflow-hidden shadow-md transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-xl">
+                                <div className="h-52 overflow-hidden bg-gray-100">
+                                    <img
+                                        src={card.image}
+                                        alt={card.title}
+                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <div className="p-5 text-center">
+                                    <h3 className="font-bold text-gray-900 text-lg leading-tight">{card.title}</h3>
+                                    <p className="text-gray-500 text-sm mt-1">{card.subtitle}</p>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
 // ── Stat card matching the image layout ────────────────────────────────────────
@@ -91,10 +168,20 @@ export default function Dashboard({
 }: Props) {
     const { auth } = usePage<SharedData>().props;
 
-    const base   = isAgent ? '?agent=me' : '';
     const vBase  = '/admin/vouchers';
     const cBase  = '/admin/clients';
 
+    // Agent: show visual service card grid (no stats)
+    if (isAgent) {
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <Head title="Dashboard" />
+                <AgentDashboard userName={auth.user.name} />
+            </AppLayout>
+        );
+    }
+
+    // Admin: show statistics dashboard
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -102,11 +189,6 @@ export default function Dashboard({
             <div className="flex flex-col gap-8 p-6">
                 <div>
                     <h1 className="text-2xl font-semibold">Dashboard</h1>
-                    {isAgent && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Welcome, <span className="font-medium">{auth.user.name}</span> — showing your data only.
-                        </p>
-                    )}
                 </div>
 
                 {/* ── Vouchers ───────────────────────────────────────────── */}

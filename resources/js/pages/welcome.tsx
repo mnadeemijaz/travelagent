@@ -979,7 +979,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
             </section>
 
             {/* ── EXPERIENCES GALLERY ────────────────────────────────────── */}
-            <section className="bg-white py-20">
+            {/* <section className="bg-white py-20">
                 <div className="mx-auto max-w-7xl px-4 md:px-6">
                     <div className="mb-12 text-center">
                         <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-teal-600">
@@ -1012,7 +1012,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                         </div>
                     )}
                 </div>
-            </section>
+            </section> */}
 
             {/* ── HOTELS ─────────────────────────────────────────────────── */}
             {hotelImages.length > 0 && (
@@ -1208,14 +1208,17 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
             {/* ── FOOTER ─────────────────────────────────────────────────── */}
             <footer id="contact" className="bg-gray-900 pt-14 pb-6 text-gray-400">
                 <div className="mx-auto max-w-7xl px-4 md:px-6">
-                    <div className="grid gap-10 md:grid-cols-3">
-                        {/* Contact */}
+                    <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+                        {/* Col 1 — Brand + Contact */}
                         <div>
-                            <div className="mb-4 flex items-center gap-2">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600">
-                                    <Plane className="h-4 w-4 text-white" />
-                                </div>
-                                <p className="font-bold text-white">
+                            <div className="mb-4 flex items-center gap-3">
+                                <img
+                                    src="/storage/icon.png"
+                                    alt="AL Abrar Travels"
+                                    className="h-12 w-12 rounded-lg object-contain bg-white p-1"
+                                />
+                                <p className="font-bold text-white leading-tight">
                                     {companyConfig.company_name || 'AL Abrar Group of Travels'}
                                 </p>
                             </div>
@@ -1244,68 +1247,92 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                             </ul>
                         </div>
 
-                        {/* Useful Links */}
+                        {/* Col 2 — Useful Links */}
                         <div>
                             <h4 className="mb-4 font-semibold text-white">Useful Links</h4>
                             <ul className="space-y-2 text-sm">
-                                {['About Us', 'Our Services', 'Tour Packages', 'Umrah Packages', 'Visa Services', 'Contact Us', 'Privacy Policy'].map(
-                                    (link) => (
-                                        <li key={link}>
-                                            <a href="#" className="transition-colors hover:text-teal-400">
-                                                {link}
-                                            </a>
-                                        </li>
-                                    ),
-                                )}
+                                {[
+                                    { label: 'About Us',       href: '#about' },
+                                    { label: 'Our Services',   href: '#services' },
+                                    { label: 'Tour Packages',  href: '#packages' },
+                                    { label: 'Umrah Packages', href: '#umrah' },
+                                    { label: 'Visa Services',  href: '#visa' },
+                                    { label: 'Contact Us',     href: '#contact' },
+                                    { label: 'Privacy Policy', href: '#' },
+                                ].map(({ label, href }) => (
+                                    <li key={label}>
+                                        <a href={href} className="transition-colors hover:text-teal-400">
+                                            {label}
+                                        </a>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        {/* Social */}
+                        {/* Col 3 — Services */}
+                        <div>
+                            <h4 className="mb-4 font-semibold text-white">Our Services</h4>
+                            <ul className="space-y-2 text-sm">
+                                {[
+                                    { label: 'Group Tickets',              href: '/group-tickets' },
+                                    { label: 'Umrah Packages',             href: '#umrah' },
+                                    { label: 'Umrah Calculator',           href: '/umrah-calculator' },
+                                    { label: 'Visa + Ticket + Transport',  href: '#services' },
+                                    { label: 'E-Visa Services',            href: '#visa' },
+                                    { label: 'Hotel Bookings',             href: '#hotels' },
+                                ].map(({ label, href }) => (
+                                    <li key={label}>
+                                        <a href={href} className="transition-colors hover:text-teal-400">
+                                            {label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Col 4 — Follow Us */}
                         <div>
                             <h4 className="mb-4 font-semibold text-white">Follow Us</h4>
-                            <div className="mb-6 flex gap-3">
-                                {[
-                                    { icon: Facebook, label: 'Facebook',href:"https://www.facebook.com/share/1Cpwi5JjKa/" },
-                                    // { icon: Twitter, label: 'Twitter',href:"https://www.twitter.com" },
-                                    { icon: Instagram, label: 'Instagram',href:"https://www.instagram.com/alabrargroup_of_travels?utm_source=qr&igsh=MXRwem5ybW01cmRjbg==" },
-                                    { icon: WhatsAppIcon, label: 'WhatsApp',href:"https://wa.me/+923006844693" },
-                                ].map(({ icon: Icon, label, href }) => (
-                                    <a
-                                        key={label}
-                                        href={href}
-                                        aria-label={label}
-                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800 text-gray-400 transition-colors hover:bg-teal-600 hover:text-white"
-                                        target='_blank'
-                                    >
-                                        <Icon className="h-4 w-4" />
-                                    </a>
-                                ))}
+                            <div className="flex gap-3">
+                                <a
+                                    href="https://www.facebook.com/share/1Cpwi5JjKa/"
+                                    aria-label="Facebook"
+                                    target="_blank"
+                                    className="flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:scale-110"
+                                    style={{ backgroundColor: '#1877F2' }}
+                                >
+                                    <Facebook className="h-5 w-5 text-white" />
+                                </a>
+                                <a
+                                    href="https://www.instagram.com/alabrargroup_of_travels?utm_source=qr&igsh=MXRwem5ybW01cmRjbg=="
+                                    aria-label="Instagram"
+                                    target="_blank"
+                                    className="flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:scale-110"
+                                    style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}
+                                >
+                                    <Instagram className="h-5 w-5 text-white" />
+                                </a>
+                                <a
+                                    href="https://wa.me/+923006844693"
+                                    aria-label="WhatsApp"
+                                    target="_blank"
+                                    className="flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:scale-110"
+                                    style={{ backgroundColor: '#25D366' }}
+                                >
+                                    <WhatsAppIcon className="h-5 w-5 text-white" />
+                                </a>
                             </div>
-                            {/* <div className="rounded-xl border border-gray-700 p-4">
-                                <p className="mb-2 text-sm font-medium text-white">Newsletter</p>
-                                <p className="mb-3 text-xs">Get exclusive travel deals in your inbox.</p>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="email"
-                                        placeholder="Your email"
-                                        className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none"
-                                    />
-                                    <button className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-medium text-white hover:bg-teal-700">
-                                        Go
-                                    </button>
-                                </div>
-                            </div> */}
                         </div>
                     </div>
 
                     <div className="mt-10 border-t border-gray-800 pt-5 text-center text-xs">
-                        © {new Date().getFullYear()} {companyConfig.company_name || 'AL Abrar Group of Travels'}. All rights reserved. |{' '}
-                        <a href="#" className="hover:text-teal-400">
-                            Privacy Policy
+                        © {new Date().getFullYear()} {companyConfig.company_name || 'AL Abrar Group of Travels'}. All rights reserved. | Developed By : M. Nadeem Ijaz{' '}
+                        <a href="https://wa.me/+923017893497" className="hover:text-teal-400" target="_blank">
+                            0301-7893497
                         </a>{' '}
                         |{' '}
-                        <a href="#" className="hover:text-teal-400">
-                            Terms &amp; Conditions
+                        <a href="https://www.idlbridge.com" className="hover:text-teal-400" target="_blank">
+                            IDL Bridge
                         </a>
                     </div>
                 </div>
@@ -1490,6 +1517,17 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* ── FLOATING WHATSAPP BUTTON ────────────────────────────────── */}
+            <a
+                href="https://wa.me/+923006844693"
+                target="_blank"
+                aria-label="Chat on WhatsApp"
+                className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
+                style={{ backgroundColor: '#25D366' }}
+            >
+                <WhatsAppIcon className="h-7 w-7 text-white" />
+            </a>
         </>
     );
 }

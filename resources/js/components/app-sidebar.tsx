@@ -37,6 +37,7 @@ const agentNavItems: NavItem[] = [
     { title: 'Umrah Calculator',  url: '/umrah-calculator',            icon: Calculator },
     { title: 'Group Bookings',    url: '/admin/group-ticket-bookings', icon: Ticket },
     { title: 'Agent Balance',     url: '/admin/reports/agent-balance', icon: BarChart2 },
+    { title: 'Group Tickets',     url: '/group-tickets',          icon: Ticket },
 ];
 
 const reportNavItems: NavItem[] = [
