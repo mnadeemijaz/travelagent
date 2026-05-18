@@ -14,7 +14,7 @@ const accountNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     { title: 'Destinations',  url: '/admin/destinations',  icon: null },
     { title: 'Tour Packages', url: '/admin/packages',  icon: null },
-    { title: 'Gallery',       url: '/admin/experiences',   icon: null },
+    // { title: 'Gallery',       url: '/admin/experiences',   icon: null },
     { title: 'Hotel Image',   url: '/admin/hotel-images',  icon: null },
     { title: 'Bank Details',  url: '/admin/bank-details',  icon: null },
 ];

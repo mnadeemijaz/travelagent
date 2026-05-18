@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { Printer } from 'lucide-react';
 import { useState } from 'react';
 
 interface HotelOption {
@@ -145,11 +146,47 @@ export default function UmrahCalculator({ agentHotels, rates }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Umrah Calculator" />
 
+            <style>{`
+                @media print {
+                    /* Hide sidebar, topbar, breadcrumbs, form controls, buttons */
+                    aside, header, nav,
+                    [data-sidebar], [data-sidebar-wrapper],
+                    .no-print { display: none !important; }
+
+                    body, html { background: white !important; }
+
+                    /* Make the content full-width */
+                    main, [data-main-content] { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+
+                    .print-only { display: block !important; }
+
+                    /* Keep summary visible, hide form sections */
+                    .print-hide { display: none !important; }
+
+                    .print-summary {
+                        break-inside: avoid;
+                    }
+                }
+                .print-only { display: none; }
+            `}</style>
+
             <div className="flex flex-col gap-6 p-6 max-w-5xl">
-                <h1 className="text-2xl font-semibold">Umrah Calculator</h1>
+                {/* Print-only header */}
+                <div className="print-only mb-4 border-b pb-3">
+                    <h1 className="text-2xl font-bold">Umrah Cost Calculator</h1>
+                    <p className="text-sm text-gray-500">AL Abrar Group of Travels &mdash; Printed on {new Date().toLocaleDateString('en-PK')}</p>
+                </div>
+
+                <div className="flex items-center justify-between no-print">
+                    <h1 className="text-2xl font-semibold">Umrah Calculator</h1>
+                    <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2">
+                        <Printer className="h-4 w-4" />
+                        Print
+                    </Button>
+                </div>
 
                 {/* ── Persons ─────────────────────────────────────────────── */}
-                <div className="rounded-lg border p-4">
+                <div className="rounded-lg border p-4 print-hide">
                     <h2 className="mb-4 font-semibold text-primary">Number of Persons</h2>
                     <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
@@ -180,7 +217,7 @@ export default function UmrahCalculator({ agentHotels, rates }: Props) {
                 </div>
 
                 {/* ── SR Rate ─────────────────────────────────────────────── */}
-                <div className="rounded-lg border p-4">
+                <div className="rounded-lg border p-4 print-hide">
                     <h2 className="mb-4 font-semibold text-primary">Exchange Rate</h2>
                     <div className="max-w-xs space-y-1">
                         <Label>1 SR = PKR</Label>
@@ -189,7 +226,7 @@ export default function UmrahCalculator({ agentHotels, rates }: Props) {
                 </div>
 
                 {/* ── Hotel Rows ──────────────────────────────────────────── */}
-                <div className="rounded-lg border p-4">
+                <div className="rounded-lg border p-4 print-hide">
                     <h2 className="mb-4 font-semibold text-primary">Hotels</h2>
 
                     {cities.length === 0 && (
@@ -291,8 +328,67 @@ export default function UmrahCalculator({ agentHotels, rates }: Props) {
                     </Button>
                 </div>
 
+                {/* ── Print-only: inputs summary ──────────────────────────── */}
+                <div className="print-only rounded-lg border p-4 mb-2">
+                    <h2 className="mb-3 font-semibold text-base">Package Details</h2>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">Adults</span><span className="font-medium">{ad}</span>
+                        </div>
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">Children</span><span className="font-medium">{ch}</span>
+                        </div>
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">Infants</span><span className="font-medium">{inf}</span>
+                        </div>
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">SR Rate</span><span className="font-medium">PKR {fmt(sr)}</span>
+                        </div>
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">Makkah Nights</span><span className="font-medium">{makkahNights}</span>
+                        </div>
+                        <div className="flex justify-between border-b py-1">
+                            <span className="text-gray-500">Madina Nights</span><span className="font-medium">{madinaNights}</span>
+                        </div>
+                    </div>
+
+                    {hotelRows.filter(r => r.nights > 0 && r.price > 0).length > 0 && (
+                        <div className="mt-3">
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Hotels</p>
+                            <table className="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="text-left p-1 border">City</th>
+                                        <th className="text-left p-1 border">Hotel</th>
+                                        <th className="text-left p-1 border">Room</th>
+                                        <th className="text-right p-1 border">Nights</th>
+                                        <th className="text-right p-1 border">Rate (SR)</th>
+                                        <th className="text-right p-1 border">Cost (PKR)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {hotelRows.filter(r => r.nights > 0 && r.price > 0).map((r, i) => {
+                                        const cityHotelsAll = agentHotels[r.city_name] ?? [];
+                                        const hotelName = cityHotelsAll.find(h => String(h.id) === r.hotel_id)?.name ?? '—';
+                                        return (
+                                            <tr key={i}>
+                                                <td className="p-1 border">{r.city_name}</td>
+                                                <td className="p-1 border">{hotelName}</td>
+                                                <td className="p-1 border">{r.room_type.replace(/_/g, ' ')}</td>
+                                                <td className="p-1 border text-right">{r.nights}</td>
+                                                <td className="p-1 border text-right">{fmt(r.price)}</td>
+                                                <td className="p-1 border text-right">PKR {fmt(r.pkrCost)}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+
                 {/* ── Summary ─────────────────────────────────────────────── */}
-                <div className="rounded-lg border p-4 bg-muted/30">
+                <div className="rounded-lg border p-4 bg-muted/30 print-summary">
                     <h2 className="mb-4 font-semibold text-primary">Cost Summary</h2>
 
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

@@ -249,7 +249,7 @@ export default function Dashboard({
                 </Section>
 
                 {/* ── Mofa ───────────────────────────────────────────────── */}
-                <Section title="Information About Mofa">
+                {/* <Section title="Information About Mofa">
                     <StatCard
                         value={mofaApproved}
                         label="Approved"
@@ -278,7 +278,7 @@ export default function Dashboard({
                         bg="bg-purple-400"
                         Icon={Rocket}
                     />
-                </Section>
+                </Section> */}
             </div>
         </AppLayout>
     );

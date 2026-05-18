@@ -19,7 +19,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: { child
                 {/* Minimal agent top bar */}
                 <header className="bg-white border-b shadow-sm px-6 py-3 flex items-center justify-between sticky top-0 z-50">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                             <div className="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden bg-white border">
                                 <img src="/storage/icon.png" alt="Al Abrar Travels" className="size-7 object-contain" />
                             </div>

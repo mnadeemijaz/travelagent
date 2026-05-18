@@ -1322,6 +1322,21 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                     <WhatsAppIcon className="h-5 w-5 text-white" />
                                 </a>
                             </div>
+
+                            {/* WhatsApp Group */}
+                            <div className="mt-5">
+                                <h4 className="mb-3 font-semibold text-white">Join Our WhatsApp Group</h4>
+                                <a
+                                    href="https://chat.whatsapp.com/D7yu15sOrDEAXG9llyu0lT"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-105"
+                                    style={{ backgroundColor: '#25D366' }}
+                                >
+                                    <WhatsAppIcon className="h-4 w-4 text-white" />
+                                    Join Group
+                                </a>
+                            </div>
                         </div>
                     </div>
 
