@@ -1078,7 +1078,7 @@ export default function Welcome({ destinations, packages, experiences, hotelImag
                                         </div>
                                         <div className="mt-3 flex items-center justify-between">
                                             <p className="text-lg font-bold text-teal-600">
-                                                PKR {Number(h.price).toLocaleString()}
+                                                 {h.price}
                                             </p>
                                             {/* <button
                                                 onClick={openRegister}

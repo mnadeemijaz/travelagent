@@ -57,7 +57,7 @@ export default function HotelImagesIndex({ hotelImages, flash }: { hotelImages: 
                                     </td>
                                     <td className="px-4 py-3 font-medium">{h.name}</td>
                                     <td className="px-4 py-3 text-muted-foreground">{h.city_name}</td>
-                                    <td className="px-4 py-3">PKR {Number(h.price).toLocaleString()}</td>
+                                    <td className="px-4 py-3"> {h.price}</td>
                                     <td className="px-4 py-3">
                                         <Badge variant={h.active ? 'default' : 'secondary'}>
                                             {h.active ? 'Active' : 'Hidden'}

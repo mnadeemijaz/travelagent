@@ -48,7 +48,7 @@ export default function HotelImagesCreate() {
 
                     <div className="space-y-1">
                         <Label>Price (PKR) <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input type="number" min="0" placeholder="e.g. 150000" value={data.price} onChange={e => setData('price', e.target.value)} />
+                        <Input type="text" placeholder="e.g. 150000" value={data.price} onChange={e => setData('price', e.target.value)} />
                         {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
                     </div>
 

@@ -37,7 +37,7 @@ class HotelImageController extends Controller
         $validated = $request->validate([
             'name'      => ['nullable', 'string', 'max:150'],
             'city_name' => ['nullable', 'string', 'max:100'],
-            'price'     => ['nullable', 'numeric', 'min:0'],
+            'price'     => ['nullable', 'string', 'max:150'],
             'image'     => ['nullable', 'image', 'max:2048'],
             'active'    => ['boolean'],
         ]);
@@ -85,7 +85,7 @@ class HotelImageController extends Controller
         $validated = $request->validate([
             'name'      => ['nullable', 'string', 'max:150'],
             'city_name' => ['nullable', 'string', 'max:100'],
-            'price'     => ['nullable', 'numeric', 'min:0'],
+            'price'     => ['nullable', 'string', 'max:150'],
             'image'     => ['nullable', 'image', 'max:2048'],
             'active'    => ['boolean'],
         ]);

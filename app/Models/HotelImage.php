@@ -10,7 +10,7 @@ class HotelImage extends Model
 
     protected function casts(): array
     {
-        return ['active' => 'boolean', 'price' => 'decimal:2'];
+        return ['active' => 'boolean'];
     }
 
     public function getImageUrlAttribute(): string

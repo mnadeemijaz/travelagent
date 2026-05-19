@@ -57,7 +57,7 @@ export default function HotelImagesEdit({ hotelImage }: { hotelImage: HotelImgPr
 
                     <div className="space-y-1">
                         <Label>Price (PKR) <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input type="number" min="0" value={data.price} onChange={e => setData('price', e.target.value)} />
+                        <Input type="text"  value={data.price} onChange={e => setData('price', e.target.value)} />
                         {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
                     </div>
 
