@@ -38,7 +38,7 @@ class HotelImageController extends Controller
             'name'      => ['nullable', 'string', 'max:150'],
             'city_name' => ['nullable', 'string', 'max:100'],
             'price'     => ['nullable', 'string', 'max:150'],
-            'image'     => ['nullable', 'image', 'max:2048'],
+            'image'     => ['required', 'image', 'max:2048'],
             'active'    => ['boolean'],
         ]);
 
@@ -91,7 +91,9 @@ class HotelImageController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($hotelImage->image);
+            if ($hotelImage->image) {
+                Storage::disk('public')->delete($hotelImage->image);
+            }
             $file      = $request->file('image');
             $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
             $filename  = Str::random(40) . '.' . $extension;
@@ -114,7 +116,9 @@ class HotelImageController extends Controller
 
     public function destroy(HotelImage $hotelImage): RedirectResponse
     {
-        Storage::disk('public')->delete($hotelImage->image);
+        if ($hotelImage->image) {
+            Storage::disk('public')->delete($hotelImage->image);
+        }
         $hotelImage->delete();
 
         return redirect()->route('admin.hotel-images.index')->with('success', 'Hotel image deleted.');

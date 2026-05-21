@@ -15,6 +15,8 @@ export default function GroupTicketsCreate({ categories }: { categories: string[
         booking_code: '', dep_date: '', dep_time: '', arr_time: '',
         flight_no: '', meal: 'yes', baggage: '',
         price: '', seats_available: '', is_active: true,
+        is_return: false,
+        ret_dep_date: '', ret_dep_time: '', ret_arr_time: '', ret_flight_no: '',
     });
 
     function submit(e: React.FormEvent) {

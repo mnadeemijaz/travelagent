@@ -56,7 +56,19 @@ class GroupTicketController extends Controller
             'price'           => ['required', 'integer', 'min:0'],
             'seats_available' => ['required', 'integer', 'min:0'],
             'is_active'       => ['boolean'],
+            'is_return'       => ['boolean'],
+            'ret_dep_date'    => ['nullable', 'date'],
+            'ret_dep_time'    => ['nullable', 'string'],
+            'ret_arr_time'    => ['nullable', 'string'],
+            'ret_flight_no'   => ['nullable', 'string', 'max:30'],
         ]);
+
+        if (empty($validated['is_return'])) {
+            $validated['ret_dep_date'] = null;
+            $validated['ret_dep_time'] = null;
+            $validated['ret_arr_time'] = null;
+            $validated['ret_flight_no'] = null;
+        }
 
         GroupTicket::create($validated);
 
@@ -88,7 +100,19 @@ class GroupTicketController extends Controller
             'price'           => ['required', 'integer', 'min:0'],
             'seats_available' => ['required', 'integer', 'min:0'],
             'is_active'       => ['boolean'],
+            'is_return'       => ['boolean'],
+            'ret_dep_date'    => ['nullable', 'date'],
+            'ret_dep_time'    => ['nullable', 'string'],
+            'ret_arr_time'    => ['nullable', 'string'],
+            'ret_flight_no'   => ['nullable', 'string', 'max:30'],
         ]);
+
+        if (empty($validated['is_return'])) {
+            $validated['ret_dep_date'] = null;
+            $validated['ret_dep_time'] = null;
+            $validated['ret_arr_time'] = null;
+            $validated['ret_flight_no'] = null;
+        }
 
         $groupTicket->update($validated);
 

@@ -41,6 +41,11 @@ interface Ticket {
     price: number;
     seats_available: number;
     remaining_seats: number;
+    is_return: boolean;
+    ret_dep_date: string | null;
+    ret_dep_time: string | null;
+    ret_arr_time: string | null;
+    ret_flight_no: string | null;
 }
 
 // ─── Auth Modal ───────────────────────────────────────────────────────────────
@@ -156,14 +161,21 @@ function TicketCard({
         <div className="rounded-2xl border border-gray-200 bg-white shadow-md overflow-hidden transition-shadow hover:shadow-lg">
             {/* ── Card Header ── */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
-                {/* Airline */}
+                {/* Airline + badges */}
                 <div className="flex items-center gap-2">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-400">
                         <Plane className="h-5 w-5" />
                     </div>
                     <div>
                         <p className="text-sm font-bold text-gray-800">{ticket.airline}</p>
-                        <p className="text-xs capitalize text-teal-600 font-medium">{ticket.category}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-xs capitalize text-teal-600 font-medium">{ticket.category}</p>
+                            {ticket.is_return && (
+                                <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 uppercase tracking-wide">
+                                    Return
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -177,56 +189,92 @@ function TicketCard({
             </div>
 
             {/* ── Card Body ── */}
-            <div className="px-5 py-4">
-                {/* Booking code row */}
-                <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-gray-400 italic">Departure</span>
-                    {ticket.booking_code && (
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">
-                                {ticket.booking_code}
-                            </span>
-                            <button
-                                onClick={copyCode}
-                                className="flex items-center gap-1 rounded bg-teal-600 px-2 py-1 text-[10px] font-semibold text-white hover:bg-teal-700 transition-colors"
-                            >
-                                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                {copied ? 'Copied' : 'Copy'}
-                            </button>
-                        </div>
-                    )}
-                </div>
+            <div className="px-5 py-4 space-y-4">
 
-                {/* Timeline */}
-                <div className="flex items-center gap-3">
-                    {/* Departure */}
-                    <div className="text-left min-w-[70px]">
-                        <p className="text-base font-black text-gray-900">{formatTime(ticket.dep_time)}</p>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.from_city}</p>
-                    </div>
-
-                    {/* Progress line */}
-                    <div className="flex-1 flex flex-col items-center gap-1">
-                        <div className="relative w-full flex items-center">
-                            <div className="h-px flex-1 bg-gray-300" />
-                            <div className="mx-2 flex h-6 w-6 items-center justify-center rounded-full bg-teal-500 shadow-sm">
-                                <Plane className="h-3 w-3 rotate-90 text-white" />
+                {/* ── Outbound leg ── */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                            {ticket.is_return ? 'Outbound' : 'Departure'}
+                        </span>
+                        {ticket.booking_code && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                                    {ticket.booking_code}
+                                </span>
+                                <button
+                                    onClick={copyCode}
+                                    className="flex items-center gap-1 rounded bg-teal-600 px-2 py-1 text-[10px] font-semibold text-white hover:bg-teal-700 transition-colors"
+                                >
+                                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    {copied ? 'Copied' : 'Copy'}
+                                </button>
                             </div>
-                            <div className="h-px flex-1 bg-gray-300" />
-                        </div>
-                        {ticket.flight_no && (
-                            <span className="text-[10px] font-bold text-teal-600 tracking-widest">
-                                {ticket.flight_no}
-                            </span>
                         )}
                     </div>
 
-                    {/* Arrival */}
-                    <div className="text-right min-w-[70px]">
-                        <p className="text-base font-black text-gray-900">{formatTime(ticket.arr_time)}</p>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.to_city}</p>
+                    <div className="flex items-center gap-3">
+                        <div className="text-left min-w-[70px]">
+                            <p className="text-base font-black text-gray-900">{formatTime(ticket.dep_time)}</p>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.from_city}</p>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center gap-1">
+                            <div className="relative w-full flex items-center">
+                                <div className="h-px flex-1 bg-gray-300" />
+                                <div className="mx-2 flex h-6 w-6 items-center justify-center rounded-full bg-teal-500 shadow-sm">
+                                    <Plane className="h-3 w-3 rotate-90 text-white" />
+                                </div>
+                                <div className="h-px flex-1 bg-gray-300" />
+                            </div>
+                            {ticket.flight_no && (
+                                <span className="text-[10px] font-bold text-teal-600 tracking-widest">
+                                    {ticket.flight_no}
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-right min-w-[70px]">
+                            <p className="text-base font-black text-gray-900">{formatTime(ticket.arr_time)}</p>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.to_city}</p>
+                        </div>
                     </div>
                 </div>
+
+                {/* ── Return leg ── */}
+                {ticket.is_return && ticket.ret_dep_date && ticket.ret_dep_time && ticket.ret_arr_time && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-3">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-semibold uppercase tracking-widest text-blue-500">
+                                Return
+                            </span>
+                            <span className="text-xs text-blue-400">{formatDate(ticket.ret_dep_date)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <div className="text-left min-w-[70px]">
+                                <p className="text-base font-black text-gray-900">{formatTime(ticket.ret_dep_time)}</p>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.to_city}</p>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-1">
+                                <div className="relative w-full flex items-center">
+                                    <div className="h-px flex-1 bg-blue-300" />
+                                    <div className="mx-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 shadow-sm">
+                                        <Plane className="h-3 w-3 -rotate-90 text-white" />
+                                    </div>
+                                    <div className="h-px flex-1 bg-blue-300" />
+                                </div>
+                                {ticket.ret_flight_no && (
+                                    <span className="text-[10px] font-bold text-blue-600 tracking-widest">
+                                        {ticket.ret_flight_no}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="text-right min-w-[70px]">
+                                <p className="text-base font-black text-gray-900">{formatTime(ticket.ret_arr_time)}</p>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{ticket.from_city}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ── Card Footer ── */}
@@ -299,11 +347,33 @@ function BookingModal({
         <DialogContent className="max-w-md">
             <DialogTitle className="text-lg font-bold">
                 Book — {ticket.from_city} → {ticket.to_city}
+                {ticket.is_return && <span className="ml-2 text-sm font-normal text-blue-600">(Return)</span>}
             </DialogTitle>
-            <div className="mb-4 rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-800">
-                <div className="font-semibold">{ticket.airline} · {ticket.flight_no ?? ''}</div>
-                <div>{formatDate(ticket.dep_date)} · {formatTime(ticket.dep_time)}</div>
-                <div className="mt-1 text-base font-bold">PKR {ticket.price.toLocaleString()} / person</div>
+            <div className="mb-4 space-y-2">
+                {/* Outbound summary */}
+                <div className="rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-800">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-teal-500">
+                            {ticket.is_return ? 'Outbound' : 'Flight'}
+                        </span>
+                        {ticket.flight_no && <span className="text-xs font-mono text-teal-600">{ticket.flight_no}</span>}
+                    </div>
+                    <div className="mt-1 font-semibold">{ticket.airline}</div>
+                    <div className="text-teal-700">{formatDate(ticket.dep_date)} · {formatTime(ticket.dep_time)} → {formatTime(ticket.arr_time)}</div>
+                    <div className="text-xs text-teal-600">{ticket.from_city} → {ticket.to_city}</div>
+                </div>
+                {/* Return summary */}
+                {ticket.is_return && ticket.ret_dep_date && ticket.ret_dep_time && ticket.ret_arr_time && (
+                    <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Return</span>
+                            {ticket.ret_flight_no && <span className="text-xs font-mono text-blue-600">{ticket.ret_flight_no}</span>}
+                        </div>
+                        <div className="mt-1 text-blue-700">{formatDate(ticket.ret_dep_date)} · {formatTime(ticket.ret_dep_time)} → {formatTime(ticket.ret_arr_time)}</div>
+                        <div className="text-xs text-blue-600">{ticket.to_city} → {ticket.from_city}</div>
+                    </div>
+                )}
+                <div className="px-1 text-base font-bold text-gray-900">PKR {ticket.price.toLocaleString()} / person</div>
             </div>
             <form onSubmit={submit} className="flex flex-col gap-4">
                 <div className="space-y-1">

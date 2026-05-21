@@ -53,7 +53,7 @@ export default function HotelImagesCreate() {
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Label>Image <span className="text-destructive text-xs">*</span></Label>
                         <ImageUpload onChange={file => setData('image', file)} error={errors.image} />
                     </div>
 

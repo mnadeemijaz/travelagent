@@ -8,6 +8,9 @@ interface GtRecord {
     booking_code: string | null; dep_date: string; dep_time: string; arr_time: string;
     flight_no: string | null; meal: string; baggage: string | null;
     price: number; seats_available: number; is_active: boolean;
+    is_return: boolean;
+    ret_dep_date: string | null; ret_dep_time: string | null;
+    ret_arr_time: string | null; ret_flight_no: string | null;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -32,6 +35,11 @@ export default function GroupTicketsEdit({ ticket, categories }: { ticket: GtRec
         price:           String(ticket.price),
         seats_available: String(ticket.seats_available),
         is_active:       ticket.is_active,
+        is_return:       ticket.is_return,
+        ret_dep_date:    ticket.ret_dep_date ? ticket.ret_dep_date.substring(0, 10) : '',
+        ret_dep_time:    ticket.ret_dep_time ? ticket.ret_dep_time.substring(0, 5) : '',
+        ret_arr_time:    ticket.ret_arr_time ? ticket.ret_arr_time.substring(0, 5) : '',
+        ret_flight_no:   ticket.ret_flight_no ?? '',
     });
 
     function submit(e: React.FormEvent) {

@@ -19,9 +19,9 @@ export default function HotelImagesEdit({ hotelImage }: { hotelImage: HotelImgPr
     const { data, setData, post, processing, errors } = useForm<{
         name: string; city_name: string; price: string; image: File | null; active: boolean; _method: string;
     }>({
-        name: hotelImage.name,
-        city_name: hotelImage.city_name,
-        price: String(hotelImage.price),
+        name: hotelImage.name ?? '',
+        city_name: hotelImage.city_name ?? '',
+        price: hotelImage.price != null ? String(hotelImage.price) : '',
         image: null,
         active: hotelImage.active,
         _method: 'PUT',
@@ -62,7 +62,7 @@ export default function HotelImagesEdit({ hotelImage }: { hotelImage: HotelImgPr
                     </div>
 
                     <div className="space-y-1">
-                        <Label>Image <span className="text-muted-foreground text-xs">(leave empty to keep current)</span></Label>
+                        <Label>Image <span className="text-muted-foreground text-xs">(leave empty to keep existing)</span></Label>
                         <ImageUpload currentUrl={hotelImage.image_url} onChange={file => setData('image', file)} error={errors.image} />
                     </div>
 
